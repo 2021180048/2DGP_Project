@@ -5,7 +5,6 @@ FRAMES_PER_ACTION = 8
 FRAMES_PER_TIME = ACTION_PER_TIME * FRAMES_PER_ACTION
 
 from pico2d import get_time, load_image, SDL_KEYDOWN, SDL_KEYUP, SDLK_SPACE, SDLK_LEFT, SDLK_RIGHT
-from ball import Ball, BigBall
 import game_world
 import game_framework
 
@@ -151,34 +150,18 @@ class StateMachine:
         self.cur_state.draw(self.boy)
 
 
-class Skate_Boy:
+class Boy:
     def __init__(self):
-        self.x, self.y = 200, 110
+        self.x, self.y = 400, 90
 
         self.frame = 0
         self.action = 0
         self.face_dir = 1
         self.dir = 0
-        self.image = load_image('skater.png')
+        self.image = load_image('skater_sprite_sheet.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
         self.item = None
-
-    # def fire_ball(self):
-    #     if self.item == 'Ball':
-    #         ball = Ball(self.x, self.y, self.face_dir*10)
-    #         game_world.add_object(ball)
-    #     elif self.item == 'BigBall':
-    #         ball = BigBall(self.x, self.y, self.face_dir*10)
-    #         game_world.add_object(ball)
-
-        # if self.face_dir == -1:
-        #     print('FIRE BALL LEFT')
-        #
-        # elif self.face_dir == 1:
-        #     print('FIRE BALL RIGHT')
-
-        # pass
 
     def update(self):
         if self.frame <= 15:
