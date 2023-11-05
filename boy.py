@@ -38,13 +38,17 @@ def space_down(e):
 def time_out(e):
     return e[0] == 'TIME_OUT'
 
+def meter_out(e):
+    return e[0] == 'METER_OUT'
+
 # time_out = lambda e : e[0] == 'TIME_OUT'
 
 class Start:
     @staticmethod
     def enter(boy, e):
-        boy.left = 80
+        boy.frame = 0
         boy.bottom = 780
+        boy.wait_time = get_time()
         pass
 
     @staticmethod
@@ -53,15 +57,17 @@ class Start:
 
     @staticmethod
     def do(boy):
-        if boy.x <= 300:
+        if boy.x <= 250:
             boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 6
             boy.x += RUN_SPEED_PPS * game_framework.frame_time
-
+            boy.left = int(boy.frame)*200 + 80
+        else:
+            boy.state_machine.handle_event(('METER_OUT', 0))
         pass
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(int(boy.frame)*200 + 80, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
         pass
     
 
@@ -100,27 +106,55 @@ class Run:
 
     @staticmethod
     def enter(boy, e):
-        if right_down(e) or left_up(e): # 오른쪽으로 RUN
-            boy.dir, boy.action, boy.face_dir = 1, 1, 1
-        elif left_down(e) or right_up(e): # 왼쪽으로 RUN
-            boy.dir, boy.action, boy.face_dir = -1, 0, -1
+        boy.frame = 0
+        boy.wait_time = get_time()
+        pass
 
     @staticmethod
     def exit(boy, e):
-        if space_down(e):
-            boy.fire_ball()
-
         pass
 
     @staticmethod
     def do(boy):
-        boy.frame = (boy.frame + 1) % 8
-        boy.x += boy.dir * 5
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 12
+        boy.left = int(boy.frame)*80 + 80
+        boy.bottom = 700
+        if get_time() - boy.wait_time > 2.0:
+            boy.state_machine.handle_event(('TIME_OUT', 0))
         pass
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.frame * 100, boy.action * 100, 100, 100, boy.x, boy.y)
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+
+
+class Ride:
+
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        if int(boy.frame) < 12:
+            boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
+
+        if int(boy.frame) < 9:
+            boy.left = int(boy.frame)*81 + 810
+            boy.bottom = 151
+        else:
+            boy.left = int(boy.frame)*81 + 320
+            boy.bottom = 380
+        pass
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
 
 
 
@@ -154,9 +188,10 @@ class StateMachine:
         self.boy = boy
         self.cur_state = Start
         self.transitions = {
-            Start: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, space_down: Idle},
+            Start: {meter_out: Run},
+            Ride: {},
             Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Sleep, space_down: Idle},
-            Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, space_down: Run},
+            Run: {time_out: Ride},
             Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run}
         }
 
