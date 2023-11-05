@@ -88,12 +88,16 @@ class Idle:
     @staticmethod
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 4
-        if int(boy.frame) < 2:
+        if 0 <= int(boy.frame) < 2:
             boy.left = 0
             boy.bottom = 700
-        else:
+        elif 2 <= int(boy.frame) < 4:
             boy.left = 0
-            boy.bottom = 74
+            boy.bottom = 75
+        # elif 4 <= int(boy.frame) < 6:
+        #     boy.left = 80
+        #     boy.bottom = 75
+
         pass
 
     @staticmethod
@@ -189,7 +193,7 @@ class Sleep:
 class StateMachine:
     def __init__(self, boy):
         self.boy = boy
-        self.cur_state = Start
+        self.cur_state = Idle
         self.transitions = {
             Start: {meter_out: Run},
             Ride: {frame_out: Idle},
