@@ -1,10 +1,16 @@
 # 이것은 각 상태들을 객체로 구현한 것임.
-TIME_PER_ACTION = 0.6
+TIME_PER_ACTION = 0.7
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
 FRAMES_PER_TIME = ACTION_PER_TIME * FRAMES_PER_ACTION
 
-from pico2d import get_time, load_image, SDL_KEYDOWN, SDL_KEYUP, SDLK_SPACE, SDLK_LEFT, SDLK_RIGHT
+PIXEL_PER_METER = 100
+RUN_SPEED_KMPH = 2.0
+RUN_SPEED_MPM = RUN_SPEED_KMPH * 1000.0 / 60.0
+RUN_SPEED_MPS = RUN_SPEED_MPM / 60.0
+RUN_SPEED_PPS = RUN_SPEED_MPS * PIXEL_PER_METER
+
+from pico2d import *
 import game_world
 import game_framework
 
@@ -34,7 +40,30 @@ def time_out(e):
 
 # time_out = lambda e : e[0] == 'TIME_OUT'
 
+class Start:
+    @staticmethod
+    def enter(boy, e):
+        boy.left = 80
+        boy.bottom = 780
+        pass
 
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        if boy.x <= 300:
+            boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 6
+            boy.x += RUN_SPEED_PPS * game_framework.frame_time
+
+        pass
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_draw(int(boy.frame)*200 + 80, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        pass
+    
 
 class Idle:
 
@@ -123,8 +152,9 @@ class Sleep:
 class StateMachine:
     def __init__(self, boy):
         self.boy = boy
-        self.cur_state = Idle
+        self.cur_state = Start
         self.transitions = {
+            Start: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, space_down: Idle},
             Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Sleep, space_down: Idle},
             Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle, space_down: Run},
             Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run}
@@ -143,7 +173,6 @@ class StateMachine:
                 self.cur_state = next_state
                 self.cur_state.enter(self.boy, e)
                 return True
-
         return False
 
     def draw(self):
@@ -152,28 +181,28 @@ class StateMachine:
 
 class Boy:
     def __init__(self):
-        self.x, self.y = 400, 90
+        self.x, self.y = 100, 90
 
         self.frame = 0
         self.action = 0
-        self.face_dir = 1
-        self.dir = 0
+        self.left = 0
+        self.bottom = 0
         self.image = load_image('skater_sprite_sheet.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
-        self.item = None
 
     def update(self):
-        if self.frame <= 15:
-            self.frame = (self.frame + FRAMES_PER_TIME * game_framework.frame_time)
-            self.action = 460        
-        # self.state_machine.update()
+        # if self.frame <= 15:
+        #     self.frame = (self.frame + FRAMES_PER_TIME * game_framework.frame_time)
+        #     self.action = 460        
+        self.state_machine.update()
         pass
 
     def handle_event(self, event):
-        pass
         # self.state_machine.handle_event(('INPUT', event))
+        pass
 
     def draw(self):
-         self.image.clip_draw(int(self.frame) * 200, self.action, 80, 80, self.x, self.y, 120, 120)
-        # self.state_machine.draw()
+        #  self.image.clip_draw(int(self.frame) * 200, self.action, 80, 80, self.x, self.y, 120, 120)
+        self.state_machine.draw()
+        pass
