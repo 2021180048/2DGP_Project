@@ -41,6 +41,9 @@ def time_out(e):
 def meter_out(e):
     return e[0] == 'METER_OUT'
 
+def frame_out(e):
+    return e[0] == 'FRAME_OUT'
+
 # time_out = lambda e : e[0] == 'TIME_OUT'
 
 class Start:
@@ -57,7 +60,7 @@ class Start:
 
     @staticmethod
     def do(boy):
-        if boy.x <= 250:
+        if boy.x <= 230:
             boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 6
             boy.x += RUN_SPEED_PPS * game_framework.frame_time
             boy.left = int(boy.frame)*200 + 80
@@ -75,30 +78,28 @@ class Idle:
 
     @staticmethod
     def enter(boy, e):
-        if boy.face_dir == -1:
-            boy.action = 2
-        elif boy.face_dir == 1:
-            boy.action = 3
-        boy.dir = 0
         boy.frame = 0
-        boy.wait_time = get_time() # pico2d import 필요
         pass
 
     @staticmethod
     def exit(boy, e):
-        if space_down(e):
-            boy.fire_ball()
         pass
 
     @staticmethod
     def do(boy):
-        boy.frame = (boy.frame + 1) % 8
-        if get_time() - boy.wait_time > 2:
-            boy.state_machine.handle_event(('TIME_OUT', 0))
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 4
+        if int(boy.frame) < 2:
+            boy.left = 0
+            boy.bottom = 700
+        else:
+            boy.left = 0
+            boy.bottom = 74
+        pass
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.frame * 100, boy.action * 100, 100, 100, boy.x, boy.y)
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 75, boy.x, boy.y, 120, 120)
+        pass
 
 
 
@@ -119,7 +120,7 @@ class Run:
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 12
         boy.left = int(boy.frame)*80 + 80
         boy.bottom = 700
-        if get_time() - boy.wait_time > 2.0:
+        if get_time() - boy.wait_time > 3.0:
             boy.state_machine.handle_event(('TIME_OUT', 0))
         pass
 
@@ -143,6 +144,8 @@ class Ride:
     def do(boy):
         if int(boy.frame) < 12:
             boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
+        else:
+            boy.state_machine.handle_event(('FRAME_OUT', 0))
 
         if int(boy.frame) < 9:
             boy.left = int(boy.frame)*81 + 810
@@ -189,7 +192,7 @@ class StateMachine:
         self.cur_state = Start
         self.transitions = {
             Start: {meter_out: Run},
-            Ride: {},
+            Ride: {frame_out: Idle},
             Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Sleep, space_down: Idle},
             Run: {time_out: Ride},
             Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run}
