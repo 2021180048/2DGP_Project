@@ -1,5 +1,5 @@
 # 이것은 각 상태들을 객체로 구현한 것임.
-TIME_PER_ACTION = 0.7
+TIME_PER_ACTION = 0.5
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
 FRAMES_PER_TIME = ACTION_PER_TIME * FRAMES_PER_ACTION
@@ -80,8 +80,10 @@ class Start:
         pass
 
 class UpSpeed:
+
     @staticmethod
     def enter(boy, e):
+        boy.frame = 0
         pass
 
     @staticmethod
@@ -89,12 +91,13 @@ class UpSpeed:
         pass
 
     @staticmethod
-    def do(boy, e):
+    def do(boy):
         if int(boy.frame) < 13:
-            boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 13
-            boy.left = int(boy.frame)*80 + 80
+            boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 12
+            boy.left = int(boy.frame) * 81 + 80
+            boy.bottom = 75 * 5
         else:
-            boy.state_machine.handle_event(('INPUT', e))
+            pass
         pass
 
     @staticmethod
@@ -222,11 +225,12 @@ class Sleep:
 class StateMachine:
     def __init__(self, boy):
         self.boy = boy
-        self.cur_state = Start
+        self.cur_state = Idle
         self.transitions = {
             Start: {meter_out: Run},
             Ride: {frame_out: Idle},
-            Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Sleep, space_down: Idle, a_down: UpSpeed},
+            Idle: {a_down: UpSpeed},
+            UpSpeed: {frame_out: Idle, a_up: Idle},
             Run: {time_out: Ride},
             Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run}
         }
