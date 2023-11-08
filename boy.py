@@ -79,6 +79,7 @@ class Start:
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
         pass
 
+
 class UpSpeed:
 
     @staticmethod
@@ -104,13 +105,16 @@ class UpSpeed:
     def draw(boy):
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
         pass
-    
+  
 
 class Idle:
 
     @staticmethod
     def enter(boy, e):
         boy.frame = 0
+        boy.radian = 0
+        boy.left = 0
+        boy.bottom = 78 * 9
         pass
 
     @staticmethod
@@ -121,11 +125,9 @@ class Idle:
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 4
         if 0 <= int(boy.frame) < 2:
-            boy.left = 0
-            boy.bottom = 700
+            boy.radian = 3.141592/180 * 1
         elif 2 <= int(boy.frame) < 4:
-            boy.left = 0
-            boy.bottom = 75
+            boy.radian = 3.141592/180 * 0
         # elif 4 <= int(boy.frame) < 6:
         #     boy.left = 80
         #     boy.bottom = 75
@@ -134,9 +136,9 @@ class Idle:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 75, boy.x, boy.y, 120, 120)
+        # boy.image.clip_draw(boy.left, boy.bottom, 80, 75, boy.x, boy.y, 120, 120)
+        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 75, boy.radian, '', boy.x, boy.y, 120, 120)
         pass
-
 
 
 class Run:
@@ -194,7 +196,6 @@ class Ride:
     @staticmethod
     def draw(boy):
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
-
 
 
 class Sleep:
