@@ -35,6 +35,12 @@ def left_up(e):
 def space_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
 
+def a_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
+
+def a_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_a
+
 def time_out(e):
     return e[0] == 'TIME_OUT'
 
@@ -66,6 +72,29 @@ class Start:
             boy.left = int(boy.frame)*200 + 80
         else:
             boy.state_machine.handle_event(('METER_OUT', 0))
+        pass
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        pass
+
+class UpSpeed:
+    @staticmethod
+    def enter(boy, e):
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy, e):
+        if int(boy.frame) < 13:
+            boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 13
+            boy.left = int(boy.frame)*80 + 80
+        else:
+            boy.state_machine.handle_event(('INPUT', e))
         pass
 
     @staticmethod
@@ -193,11 +222,11 @@ class Sleep:
 class StateMachine:
     def __init__(self, boy):
         self.boy = boy
-        self.cur_state = Idle
+        self.cur_state = Start
         self.transitions = {
             Start: {meter_out: Run},
             Ride: {frame_out: Idle},
-            Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Sleep, space_down: Idle},
+            Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out: Sleep, space_down: Idle, a_down: UpSpeed},
             Run: {time_out: Ride},
             Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run}
         }
@@ -241,7 +270,7 @@ class Boy:
         pass
 
     def handle_event(self, event):
-        # self.state_machine.handle_event(('INPUT', event))
+        self.state_machine.handle_event(('INPUT', event))
         pass
 
     def draw(self):
