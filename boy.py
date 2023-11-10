@@ -6,7 +6,7 @@ FRAMES_PER_TIME = ACTION_PER_TIME * FRAMES_PER_ACTION
 
 PIXEL_PER_METER = 100
 
-RUN_SPEED_KMPH = 1.0
+RUN_SPEED_KMPH = 5.0
 RUN_SPEED_MPM = RUN_SPEED_KMPH * 1000.0 / 60.0
 RUN_SPEED_MPS = RUN_SPEED_MPM / 60.0
 RUN_SPEED_PPS = RUN_SPEED_MPS * PIXEL_PER_METER
@@ -70,7 +70,7 @@ class Start:
 
     @staticmethod
     def do(boy):
-        if boy.x <= 230:
+        if boy.x <= 200:
             boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 6
             boy.x += RUN_SPEED_PPS * game_framework.frame_time
             boy.left = int(boy.frame)*200 + 80
@@ -299,7 +299,7 @@ class StateMachine:
 
 class Boy:
     def __init__(self):
-        self.x, self.y = 100, 200
+        self.x, self.y = 50, 200
 
         self.frame = 0
         self.action = 0

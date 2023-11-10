@@ -11,7 +11,7 @@ from boy import Boy
 
 def init():
     global boy
-
+    global back_ground
     running = True
 
     boy = Boy()
@@ -46,6 +46,7 @@ def handle_events():
             game_framework.change_mode(title_mode)
         else:
             boy.handle_event(event)
+            back_ground.handle_event(event)
 
 
 def pause():
