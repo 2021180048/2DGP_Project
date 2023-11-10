@@ -1,5 +1,10 @@
 from boy import *
 
+MAP_SPEED_KMPH = 2.0
+MAP_SPEED_MPM = MAP_SPEED_KMPH * 1000.0 / 60.0
+MAP_SPEED_MPS = MAP_SPEED_MPM / 60.0
+MAP_SPEED_PPS = MAP_SPEED_MPS * PIXEL_PER_METER
+
 
 def a_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
@@ -7,10 +12,15 @@ def a_down(e):
 def a_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_a
 
+def time_out(e):
+    return e[0] == 'TIME_OUT'
+
 
 class Start:
     @staticmethod
     def enter(back_ground, e):
+        back_ground.speed = 0
+        back_ground.wait_time = get_time()
         pass
 
     @staticmethod
@@ -19,9 +29,9 @@ class Start:
 
     @staticmethod
     def do(back_ground):
-        back_ground.x -= RUN_SPEED_PPS * game_framework.frame_time
-        if int(back_ground.x) <= -400:
-            back_ground.x = 400
+        if get_time() - back_ground.wait_time > 2.5:
+            back_ground.speed = 2
+            back_ground.state_machine.handle_event(('TIME_OUT', 0))
         pass
 
     @staticmethod
@@ -29,7 +39,6 @@ class Start:
         back_ground.image.draw(back_ground.x, back_ground.y, 800, 600)
         back_ground.image.draw(back_ground.x + 800, back_ground.y, 800, 600)
         pass
-
 
 class Move:
     @staticmethod
@@ -42,9 +51,37 @@ class Move:
 
     @staticmethod
     def do(back_ground):
-        back_ground.x -= RUN_SPEED_PPS * game_framework.frame_time * 1.2
+        back_ground.x -= MAP_SPEED_PPS * game_framework.frame_time * back_ground.speed
+        if int(back_ground.x) <= -400:
+            back_ground.x = 400            
+        pass
+
+    @staticmethod
+    def draw(back_ground):
+        back_ground.image.draw(back_ground.x, back_ground.y, 800, 600)
+        back_ground.image.draw(back_ground.x + 800, back_ground.y, 800, 600)
+        pass
+
+
+class Upspeed:
+    @staticmethod
+    def enter(back_ground, e):
+        back_ground.wait_time = get_time()
+        pass
+
+    @staticmethod
+    def exit(back_ground, e):
+        pass
+
+    @staticmethod
+    def do(back_ground):
+        back_ground.x -= MAP_SPEED_PPS * game_framework.frame_time * back_ground.speed
         if int(back_ground.x) <= -400:
             back_ground.x = 400
+        
+        if get_time() - back_ground.wait_time > 0.7:
+            back_ground.speed += 1.0
+            back_ground.wait_time += get_time()
 
         pass
 
@@ -61,8 +98,9 @@ class StateMachine:
         self.back_ground = back_ground
         self.cur_state = Start
         self.transitions = {
-            Start: {a_down: Move},
-            Move: {a_up: Start},
+            Start: {time_out: Move},
+            Move: {a_down: Upspeed},
+            Upspeed: {a_up: Move},
         }
 
     def start(self):
@@ -91,6 +129,7 @@ class Back_ground:
     def __init__(self):
         self.x = 400
         self.y = 300
+        self.speed = 0.0
         self.state_machine = StateMachine(self)
         self.state_machine.start()
         

@@ -6,12 +6,12 @@ FRAMES_PER_TIME = ACTION_PER_TIME * FRAMES_PER_ACTION
 
 PIXEL_PER_METER = 100
 
-RUN_SPEED_KMPH = 5.0
+RUN_SPEED_KMPH = 3.0
 RUN_SPEED_MPM = RUN_SPEED_KMPH * 1000.0 / 60.0
 RUN_SPEED_MPS = RUN_SPEED_MPM / 60.0
 RUN_SPEED_PPS = RUN_SPEED_MPS * PIXEL_PER_METER
 
-JUMP_SPEED_KMPH = 10.0
+JUMP_SPEED_KMPH = 15.0
 JUMP_SPEED_MPM = JUMP_SPEED_KMPH * 1000.0 / 60.0
 JUMP_SPEED_MPS = JUMP_SPEED_MPM / 60.0
 JUMP_SPEED_PPS = JUMP_SPEED_MPS * PIXEL_PER_METER
@@ -62,6 +62,7 @@ class Start:
     @staticmethod
     def enter(boy, e):
         boy.frame = 0
+        boy.wait_time = get_time()
         pass
 
     @staticmethod
@@ -70,12 +71,11 @@ class Start:
 
     @staticmethod
     def do(boy):
-        if boy.x <= 200:
-            boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 6
-            boy.x += RUN_SPEED_PPS * game_framework.frame_time
-            boy.left = int(boy.frame)*200 + 80
-            boy.bottom = 780
-        else:
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 6
+        boy.x += RUN_SPEED_PPS * game_framework.frame_time
+        boy.left = int(boy.frame)*200 + 80
+        boy.bottom = 780
+        if get_time() - boy.wait_time > 2.5:
             boy.state_machine.handle_event(('METER_OUT', 0))
         pass
 
@@ -232,6 +232,7 @@ class Jump:
         boy.bottom = 75 * 2
         boy.left = 0
         boy.dir = 1
+        boy.wait_time = get_time()
         pass
 
     @staticmethod
@@ -246,17 +247,19 @@ class Jump:
         if int(boy.frame) < 9:
             boy.left = int(boy.frame) * 80 + (82 * 10)
             boy.bottom = 75 * 2
-#        if 10 <= int(boy.frame) < 13:
-#           boy.left = int(boy.frame-10) * 86 + (80 * 13)
-#          boy.bottom = 75 * 5
+
         boy.y += JUMP_SPEED_PPS * game_framework.frame_time * boy.dir
 
-        if int(boy.y) > 300:
+        if get_time() - boy.wait_time > 0.35:
             boy.dir = -1
-        if int(boy.y) < 200:
+
+        # if int(boy.y) > 320:
+        #     boy.dir = -1
+        # if int(boy.y) < 200:
+        #     boy.dir = 0
+        #     boy.y = 200
+        if int(boy.y) <= 200:
             boy.dir = 0
-            boy.y = 200
-        if int(boy.y) == 200:
             boy.state_machine.handle_event(("METER_OUT", 0))
 
     @staticmethod
