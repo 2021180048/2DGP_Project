@@ -3,6 +3,7 @@ from pico2d import *
 import game_framework
 import game_world
 import title_mode
+from back_ground import Back_ground
 from boy import Boy
 
 
@@ -15,6 +16,9 @@ def init():
 
     boy = Boy()
     game_world.add_object(boy, 1)
+
+    back_ground = Back_ground()
+    game_world.add_object(back_ground, 0)
 
 
 def finish():
