@@ -117,7 +117,7 @@ class UpSpeed:
         if get_time() - boy.wait_time > 0.5:
             game_world.objects[0][0].speed += 1
             game_world.objects[1][0].speed += 1
-            boy.wait_time += get_time()
+            boy.wait_time += (get_time() - boy.wait_time)
            
 
 
