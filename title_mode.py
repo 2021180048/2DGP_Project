@@ -1,8 +1,6 @@
-from pico2d import load_image, clear_canvas, update_canvas, get_events, get_time
-from sdl2 import SDL_KEYDOWN, SDLK_ESCAPE, SDLK_SPACE
+from header import*
 import game_framework
 import play_mode
-
 
 def init():
     global image

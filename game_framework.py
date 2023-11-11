@@ -1,8 +1,8 @@
-from pico2d import *
+from header import *
 import time
+
 running = None
 stack = None
-
 
 def change_mode(mode):
     global stack

@@ -1,5 +1,7 @@
-from boy import *
+from header import *
+import game_framework
 
+PIXEL_PER_METER = 100
 MAP_SPEED_KMPH = 2.0
 MAP_SPEED_MPM = MAP_SPEED_KMPH * 1000.0 / 60.0
 MAP_SPEED_MPS = MAP_SPEED_MPM / 60.0
@@ -130,9 +132,10 @@ class Back_ground:
         self.x = 800
         self.y = 300
         self.speed = 0.0
+        self.wait_time = 0.0
         self.state_machine = StateMachine(self)
         self.state_machine.start()
-        
+
         if Back_ground.image == None:
             self.image = load_image('back_ground.jpg')
     

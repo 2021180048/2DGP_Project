@@ -1,4 +1,6 @@
-# 이것은 각 상태들을 객체로 구현한 것임.
+from header import *
+import game_framework
+
 TIME_PER_ACTION = 0.5
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
@@ -15,10 +17,6 @@ JUMP_SPEED_KMPH = 15.0
 JUMP_SPEED_MPM = JUMP_SPEED_KMPH * 1000.0 / 60.0
 JUMP_SPEED_MPS = JUMP_SPEED_MPM / 60.0
 JUMP_SPEED_PPS = JUMP_SPEED_MPS * PIXEL_PER_METER
-
-from pico2d import *
-import game_world
-import game_framework
 
 # state event check
 # ( state event type, event value )
@@ -84,7 +82,6 @@ class Start:
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
         pass
 
-
 class UpSpeed:
 
     @staticmethod
@@ -106,7 +103,6 @@ class UpSpeed:
     def draw(boy):
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
         pass
-  
 
 class Idle:
 
@@ -138,7 +134,6 @@ class Idle:
         boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 75, boy.radian, '', boy.x, boy.y, 120, 120)
         pass
 
-
 class Run:
 
     @staticmethod
@@ -163,7 +158,6 @@ class Run:
     @staticmethod
     def draw(boy):
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
-
 
 class Ride:
 
@@ -198,7 +192,6 @@ class Ride:
     def draw(boy):
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
 
-
 class Sleep:
 
     @staticmethod
@@ -222,7 +215,6 @@ class Sleep:
         else:
             boy.image.clip_composite_draw(boy.frame * 100, 300, 100, 100,
                                           3.141592 / 2, '', boy.x - 25, boy.y - 25, 100, 100)
-
 
 class Jump:
 
@@ -299,11 +291,10 @@ class StateMachine:
     def draw(self):
         self.cur_state.draw(self.boy)
 
-
 class Boy:
     def __init__(self):
         self.x, self.y = 50, 200
-
+        self.x1, self.y1, self.x2, self.y2 = 25, 50, 30, 50
         self.frame = 0
         self.action = 0
         self.left = 0
@@ -323,4 +314,8 @@ class Boy:
 
     def draw(self):
         self.state_machine.draw()
+        draw_rectangle(*self.get_bb())
         pass
+
+    def get_bb(self):
+        return self.x - self.x1, self.y - self.y1, self.x + self.x2, self.y + self.y2  # 튜플

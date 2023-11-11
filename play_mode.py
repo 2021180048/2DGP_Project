@@ -1,13 +1,10 @@
-from pico2d import *
-
-import game_framework
-import game_world
-import title_mode
-from back_ground import Back_ground
+from header import *
 from boy import Boy
-
-
-# Game object class here
+from back_ground import Back_ground
+from rail import Rail
+import game_world
+import game_framework
+import title_mode
 
 def init():
     global boy
@@ -15,26 +12,27 @@ def init():
     running = True
 
     boy = Boy()
-    game_world.add_object(boy, 1)
+    game_world.add_object(boy, 2)
 
     back_ground = Back_ground()
     game_world.add_object(back_ground, 0)
 
+    rail = Rail()
+    game_world.add_object(rail,1)
+
+    
 
 def finish():
     game_world.clear()
     pass
 
-
 def update():
     game_world.update()
-
 
 def draw():
     clear_canvas()
     game_world.render()
     update_canvas()
-
 
 def handle_events():
 
@@ -48,12 +46,9 @@ def handle_events():
             boy.handle_event(event)
             back_ground.handle_event(event)
 
-
 def pause():
-    # boy.wait_time = 1000000000000000000000000000000000.0
     pass
 
 def resume():
-    # boy.wait_time = get_time()
     pass
 
