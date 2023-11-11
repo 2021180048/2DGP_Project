@@ -36,8 +36,8 @@ class Start:
 
     @staticmethod
     def draw(back_ground):
-        back_ground.image.draw(back_ground.x, back_ground.y, 800, 600)
-        back_ground.image.draw(back_ground.x + 800, back_ground.y, 800, 600)
+        back_ground.image.draw(back_ground.x, back_ground.y, 1600, 600)
+        back_ground.image.draw(back_ground.x + 1600, back_ground.y, 1600, 600)
         pass
 
 class Move:
@@ -52,14 +52,14 @@ class Move:
     @staticmethod
     def do(back_ground):
         back_ground.x -= MAP_SPEED_PPS * game_framework.frame_time * back_ground.speed
-        if int(back_ground.x) <= -400:
-            back_ground.x = 400            
+        if int(back_ground.x) <= -800:
+            back_ground.x = 800            
         pass
 
     @staticmethod
     def draw(back_ground):
-        back_ground.image.draw(back_ground.x, back_ground.y, 800, 600)
-        back_ground.image.draw(back_ground.x + 800, back_ground.y, 800, 600)
+        back_ground.image.draw(back_ground.x, back_ground.y, 1600, 600)
+        back_ground.image.draw(back_ground.x + 1600, back_ground.y, 1600, 600)
         pass
 
 
@@ -76,8 +76,8 @@ class Upspeed:
     @staticmethod
     def do(back_ground):
         back_ground.x -= MAP_SPEED_PPS * game_framework.frame_time * back_ground.speed
-        if int(back_ground.x) <= -400:
-            back_ground.x = 400
+        if int(back_ground.x) <= -800:
+            back_ground.x = 800
         
         if get_time() - back_ground.wait_time > 0.7:
             back_ground.speed += 1.0
@@ -87,8 +87,8 @@ class Upspeed:
 
     @staticmethod
     def draw(back_ground):
-        back_ground.image.draw(back_ground.x, back_ground.y, 800, 600)
-        back_ground.image.draw(back_ground.x + 800, back_ground.y, 800, 600)
+        back_ground.image.draw(back_ground.x, back_ground.y, 1600, 600)
+        back_ground.image.draw(back_ground.x + 1600, back_ground.y, 1600, 600)
 
         pass
 
@@ -127,7 +127,7 @@ class Back_ground:
     image = None
     
     def __init__(self):
-        self.x = 400
+        self.x = 800
         self.y = 300
         self.speed = 0.0
         self.state_machine = StateMachine(self)
