@@ -7,128 +7,6 @@ MAP_SPEED_MPM = MAP_SPEED_KMPH * 1000.0 / 60.0
 MAP_SPEED_MPS = MAP_SPEED_MPM / 60.0
 MAP_SPEED_PPS = MAP_SPEED_MPS * PIXEL_PER_METER
 
-def right_down(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_RIGHT
-
-def right_up(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_RIGHT
-
-def a_down(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
-
-def a_up(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_a
-
-def time_out(e):
-    return e[0] == 'TIME_OUT'
-
-
-class Start:
-    @staticmethod
-    def enter(back_ground, e):
-        back_ground.speed = 0
-        back_ground.wait_time = get_time()
-        pass
-
-    @staticmethod
-    def exit(back_ground, e):
-        back_ground.speed = 0
-        pass
-
-    @staticmethod
-    def do(back_ground):
-        if get_time() - back_ground.wait_time > 2.5:
-            back_ground.state_machine.handle_event(('TIME_OUT', 0))
-        pass
-
-    @staticmethod
-    def draw(back_ground):
-        back_ground.image.draw(back_ground.x, back_ground.y, 1600, 600)
-        back_ground.image.draw(back_ground.x + 1600, back_ground.y, 1600, 600)
-        pass
-
-class Move:
-    @staticmethod
-    def enter(back_ground, e):
-        pass
-
-    @staticmethod
-    def exit(back_ground, e):
-        pass
-
-    @staticmethod
-    def do(back_ground):
-        back_ground.x -= MAP_SPEED_PPS * game_framework.frame_time * back_ground.speed
-        if int(back_ground.x) <= -800:
-            back_ground.x = 800            
-        pass
-
-    @staticmethod
-    def draw(back_ground):
-        back_ground.image.draw(back_ground.x, back_ground.y, 1600, 600)
-        back_ground.image.draw(back_ground.x + 1600, back_ground.y, 1600, 600)
-        pass
-
-
-class Upspeed:
-    @staticmethod
-    def enter(back_ground, e):
-        back_ground.wait_time = get_time()
-        pass
-
-    @staticmethod
-    def exit(back_ground, e):
-        pass
-
-    @staticmethod
-    def do(back_ground):
-        back_ground.x -= MAP_SPEED_PPS * game_framework.frame_time * back_ground.speed
-        if int(back_ground.x) <= -800:
-            back_ground.x = 800
-        
-        if get_time() - back_ground.wait_time > 0.5:
-            back_ground.speed += 1.0
-            back_ground.wait_time += get_time()
-
-        pass
-
-    @staticmethod
-    def draw(back_ground):
-        back_ground.image.draw(back_ground.x, back_ground.y, 1600, 600)
-        back_ground.image.draw(back_ground.x + 1600, back_ground.y, 1600, 600)
-
-        pass
-
-
-class StateMachine:
-    def __init__(self, back_ground):
-        self.back_ground = back_ground
-        self.cur_state = Move
-        self.transitions = {
-            Start: {time_out: Move},
-            Move: {right_down: Upspeed},
-            Upspeed: {right_up: Move},
-        }
-
-    def start(self):
-        self.cur_state.enter(self.back_ground, ('NONE', 0))
-
-    def update(self):
-        self.cur_state.do(self.back_ground)
-
-    def handle_event(self, e):
-        for check_event, next_state in self.transitions[self.cur_state].items():
-            if check_event(e):
-                self.cur_state.exit(self.back_ground, e)
-                self.cur_state = next_state
-                self.cur_state.enter(self.back_ground, e)
-                return True
-        return False
-
-    def draw(self):
-        self.cur_state.draw(self.back_ground)
-
-
 class Back_ground:
     
     image = None
@@ -140,18 +18,14 @@ class Back_ground:
         self.speed = 0
         self.wait_time = 0.0
         self.bad = 0
-        # self.state_machine = StateMachine(self)
-        # self.state_machine.start()
 
         if Back_ground.image == None:
             self.image = load_image('back_ground.jpg')
     
     def handle_event(self, event):
-        # self.state_machine.handle_event(('INPUT', event))
         pass
 
     def update(self):
-        # self.state_machine.update()
         self.x -= MAP_SPEED_PPS * game_framework.frame_time * self.speed
         if int(self.x) <= -800:
             self.x = 800
@@ -159,7 +33,6 @@ class Back_ground:
         pass
 
     def draw(self):
-        # self.state_machine.draw()
         self.image.draw(self.x, self.y, 1600, 600)
         self.image.draw(self.x + 1600, self.y, 1600, 600)
 
