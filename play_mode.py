@@ -49,7 +49,7 @@ def handle_events():
             game_framework.change_mode(title_mode)
         else:
             boy.handle_event(event)
-            boy.event = event
+            boy.get_event(event)
             # back_ground.handle_event(event)
             # rail.handle_event(event)
 

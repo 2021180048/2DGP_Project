@@ -262,6 +262,7 @@ class Falling:
         boy.wait_time = get_time()
         boy.good = 0
         boy.bad = 0
+        boy.ok = True
         pass
 
     @staticmethod
@@ -272,18 +273,23 @@ class Falling:
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
 
-        if get_time() - boy.wait_time > 0.35:
-            if boy.event.type ==SDL_KEYDOWN and boy.event.key == SDLK_a:
+        if get_time() - boy.wait_time > 0.25:
+            if boy.event:
                 boy.good = 1
                 print('good')
+                boy.event = False
         else:
-            boy.bad = 1
-            print('bad')
+            if boy.event:
+                boy.bad = 1
+                print('bad')
+                boy.event = False
 
         if boy.back_ground_collision == 1:
             if boy.good == 1:
                 boy.state_machine.handle_event(('GOOD_FINISH', 0))
             if boy.bad == 1:
+                boy.state_machine.handle_event(('BAD_FINISH', 0))
+            if boy.good == 0 and boy.bad == 0:
                 boy.state_machine.handle_event(('BAD_FINISH', 0))
         else:
             boy.gravity()
@@ -456,7 +462,8 @@ class Boy:
         self.down_speed = 0
         self.bad = 0
         self.good = 0
-        self.event = None
+        self.event = False
+        self.ok = False
         self.image = load_image('skater_sprite_sheet.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
@@ -474,10 +481,10 @@ class Boy:
         draw_rectangle(*self.get_bb())
         pass
 
-    # def get_event(self,event):
-    #     if event.type == SDL_KEYDOWN and event.key == SDLK_a:
-    #         self.event = True
-    #         print('a')
+    def get_event(self,event):
+        if event.type == SDL_KEYDOWN and event.key == SDLK_a and self.ok == True:
+            self.event = True
+            self.ok = False
 
     def get_bb(self):
         return self.x - self.x1, self.y - self.y1, self.x + self.x2, self.y + self.y2  # 튜플
