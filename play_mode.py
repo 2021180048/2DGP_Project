@@ -19,11 +19,13 @@ def init():
     game_world.add_object(back_ground, 0)
 
     rail = Rail()
-    game_world.add_object(rail,1)
+    game_world.add_object(rail, 1)
 
     game_world.add_collision_pair('boy:rail', boy, rail)
 
     game_world.add_collision_pair('boy:back_ground', boy, back_ground)
+
+    game_world.add_collision_pair('back_ground:rail', back_ground, rail)
 
 def finish():
     game_world.clear()
@@ -39,7 +41,6 @@ def draw():
     update_canvas()
 
 def handle_events():
-
     events = get_events()
     for event in events:
         if event.type == SDL_QUIT:
@@ -48,8 +49,9 @@ def handle_events():
             game_framework.change_mode(title_mode)
         else:
             boy.handle_event(event)
-            back_ground.handle_event(event)
-            rail.handle_event(event)
+            boy.event = event
+            # back_ground.handle_event(event)
+            # rail.handle_event(event)
 
 def pause():
     pass

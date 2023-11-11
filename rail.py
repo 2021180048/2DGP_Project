@@ -126,24 +126,26 @@ class Rail():
     def __init__(self):
         self.x = 1200
         self.y = 180
-        self.speed = 0.0
+        self.speed = 0
         self.wait_time = 0.0        
         self.x1, self.y1, self.x2, self.y2 = 160, -10, 180, 20
         self.image = load_image('rail.png')
-        self.state_machine = StateMachine(self)
-        self.state_machine.start()
+        # self.state_machine = StateMachine(self)
+        # self.state_machine.start()
         pass
 
     def handle_event(self, event):
-        self.state_machine.handle_event(('INPUT', event))
+        # self.state_machine.handle_event(('INPUT', event))
         pass
 
     def update(self):
-        self.state_machine.update()
+        self.x -= RAIL_SPEED_PPS * game_framework.frame_time * self.speed
+        # self.state_machine.update()
         pass
 
     def draw(self):
-        self.state_machine.draw()
+        # self.state_machine.draw()
+        self.image.draw(self.x, self.y)        
         draw_rectangle(*self.get_bb())
         pass
 
@@ -154,8 +156,14 @@ class Rail():
         if group == 'boy:rail':
             pass
 
+        if group == 'back_ground:rail':
+            pass
+
     def handle_not_collision(self, group, other):
         if group == 'boy:rail':
+            pass
+
+        if group == 'back_ground:rail':
             pass
 
     

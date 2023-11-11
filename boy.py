@@ -1,5 +1,6 @@
 from header import *
 import game_framework
+import game_world
 
 TIME_PER_ACTION = 0.5
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
@@ -61,7 +62,13 @@ def frame_out(e):
     return e[0] == 'FRAME_OUT'
 
 def falling(e):
-    return e[0] == 'Falling'
+    return e[0] == 'FALLING'
+
+def bad_finish(e):
+    return e[0] == 'BAD_FINISH'
+
+def good_finish(e):
+    return e[0] == 'GOOD_FINISH'
 
 class Start:
     @staticmethod
@@ -94,6 +101,7 @@ class UpSpeed:
     @staticmethod
     def enter(boy, e):
         boy.frame = 0
+        boy.wait_time = get_time()
         pass
 
     @staticmethod
@@ -106,6 +114,13 @@ class UpSpeed:
         boy.left = int(boy.frame) * 81 + 80
         boy.bottom = 75 * 5
 
+        if get_time() - boy.wait_time > 0.5:
+            game_world.objects[0][0].speed += 1
+            game_world.objects[1][0].speed += 1
+            boy.wait_time += get_time()
+           
+
+
     @staticmethod
     def draw(boy):
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
@@ -117,7 +132,8 @@ class Idle:
     def enter(boy, e):
         boy.frame = 0
         boy.radian = 0
-        boy.rail_collision = 0
+        boy.rail_collision = 1
+        boy.back_ground_collision = 1
         pass
 
     @staticmethod
@@ -127,7 +143,7 @@ class Idle:
     @staticmethod
     def do(boy):
         if boy.back_ground_collision != 1 and boy.rail_collision != 1:
-            boy.state_machine.handle_event(('Falling', 0))
+            boy.state_machine.handle_event(('FALLING', 0))
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 4
         boy.left = 0
         boy.bottom = 78 * 9
@@ -225,7 +241,7 @@ class Jump:
 
         
         if get_time() - boy.wait_time >= 0.35:
-            boy.state_machine.handle_event(('Falling', 0))
+            boy.state_machine.handle_event(('FALLING', 0))
         else:
             boy.y += JUMP_SPEED_PPS * game_framework.frame_time
             boy.rail_collision = 0
@@ -243,6 +259,9 @@ class Falling:
     def enter(boy, e):
         boy.frame = 0
         boy.rail_collision = 0
+        boy.wait_time = get_time()
+        boy.good = 0
+        boy.bad = 0
         pass
 
     @staticmethod
@@ -253,8 +272,19 @@ class Falling:
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
 
+        if get_time() - boy.wait_time > 0.35:
+            if boy.event.type ==SDL_KEYDOWN and boy.event.key == SDLK_a:
+                boy.good = 1
+                print('good')
+        else:
+            boy.bad = 1
+            print('bad')
+
         if boy.back_ground_collision == 1:
-            boy.state_machine.handle_event(("METER_OUT", 0))
+            if boy.good == 1:
+                boy.state_machine.handle_event(('GOOD_FINISH', 0))
+            if boy.bad == 1:
+                boy.state_machine.handle_event(('BAD_FINISH', 0))
         else:
             boy.gravity()
 
@@ -307,6 +337,76 @@ class Railing:
         boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 80, boy.radian, '', boy.x, boy.y, 120, 120)
         pass
 
+class Bad_Finish:
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        boy.rail_collision = 0
+        boy.back_ground_collision = 0
+        boy.wait_time = get_time()
+        game_world.objects[0][0].speed -= 1
+        game_world.objects[1][0].speed -= 1
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        boy.bad = 0
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
+
+        if get_time() - boy.wait_time > 0.7:
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+        if int(boy.frame) < 5:
+            boy.left = 0 * 81
+            boy.bottom = 79 * 11
+        elif 5 <= int(boy.frame):
+            boy.left = 0 * 81
+            boy.bottom = 79 * 12
+
+        pass
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 80, boy.radian, '', boy.x, boy.y, 120, 120)
+        pass
+
+class Good_Finish:
+
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        boy.rail_collision = 0
+        boy.back_ground_collision = 0
+        boy.radian = 0
+        boy.wait_time = get_time()
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        boy.good = 0
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
+
+        if get_time() - boy.wait_time > 0.35:
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+        if int(boy.frame) < 4:
+            boy.left = int(boy.frame) * 93 + (93 * 13)
+            boy.bottom = 0
+        pass
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        pass
+
 class StateMachine:
     def __init__(self, boy):
         self.boy = boy
@@ -318,8 +418,10 @@ class StateMachine:
             UpSpeed: {frame_out: Idle, right_up: Idle},
             Run: {time_out: Ride},
             Jump: {meter_out: Idle, falling: Falling},
-            Falling: {meter_out: Idle, s_down: Railing},
+            Falling: {meter_out: Idle, s_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish},
             Railing: {s_up: Falling, space_down: Jump},
+            Bad_Finish: {time_out: Idle},
+            Good_Finish: {time_out: Idle},
         }
 
     def start(self):
@@ -351,6 +453,10 @@ class Boy:
         self.bottom = 0
         self.dir = 0
         self.back_ground_collision = 0
+        self.down_speed = 0
+        self.bad = 0
+        self.good = 0
+        self.event = None
         self.image = load_image('skater_sprite_sheet.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
@@ -367,6 +473,11 @@ class Boy:
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
         pass
+
+    # def get_event(self,event):
+    #     if event.type == SDL_KEYDOWN and event.key == SDLK_a:
+    #         self.event = True
+    #         print('a')
 
     def get_bb(self):
         return self.x - self.x1, self.y - self.y1, self.x + self.x2, self.y + self.y2  # 튜플
@@ -388,8 +499,6 @@ class Boy:
         if group == 'boy:back_ground':
             self.back_ground_collision = 0
             pass
-            
-
 
     def gravity(self):
         self.y -= JUMP_SPEED_PPS * game_framework.frame_time
