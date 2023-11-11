@@ -25,12 +25,12 @@ class Start:
 
     @staticmethod
     def exit(rail, e):
+        rail.speed = 0
         pass
 
     @staticmethod
     def do(rail):
         if get_time() - rail.wait_time > 2.5:
-            rail.speed = 1
             rail.state_machine.handle_event(('TIME_OUT', 0))
         pass
 
@@ -41,7 +41,7 @@ class Start:
 
 class Move:
     @staticmethod
-    def enter(rail, e):
+    def enter(rail, e):       
         pass
 
     @staticmethod
@@ -51,6 +51,9 @@ class Move:
     @staticmethod
     def do(rail):
         rail.x -= RAIL_SPEED_PPS * game_framework.frame_time * rail.speed
+        if int(rail.x) <= -200:
+            rail.x = 1600            
+
         pass
 
     @staticmethod
@@ -73,7 +76,7 @@ class Upspeed:
     def do(rail):
         rail.x -= RAIL_SPEED_PPS * game_framework.frame_time * rail.speed
         
-        if get_time() - rail.wait_time > 0.7:
+        if get_time() - rail.wait_time > 0.5:
             rail.speed += 1.0
             rail.wait_time += get_time()
         pass
@@ -87,7 +90,7 @@ class Upspeed:
 class StateMachine:
     def __init__(self, rail):
         self.rail = rail
-        self.cur_state = Start
+        self.cur_state = Move
         self.transitions = {
             Start: {time_out: Move},
             Move: {a_down: Upspeed},
@@ -119,7 +122,7 @@ class Rail():
         self.y = 180
         self.speed = 0.0
         self.wait_time = 0.0        
-        self.x1, self.y1, self.x2, self.y2 = 160, 25, 180, 20
+        self.x1, self.y1, self.x2, self.y2 = 160, -10, 180, 20
         self.image = load_image('rail.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
@@ -140,4 +143,13 @@ class Rail():
 
     def get_bb(self):
         return self.x - self.x1, self.y - self.y1, self.x + self.x2, self.y + self.y2  # 튜플
+    
+    def handle_collision(self, group, other):
+        if group == 'boy:rail':
+            pass
+
+    def handle_not_collision(self, group, other):
+        if group == 'boy:rail':
+            pass
+
     

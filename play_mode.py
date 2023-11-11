@@ -21,7 +21,9 @@ def init():
     rail = Rail()
     game_world.add_object(rail,1)
 
-    
+    game_world.add_collision_pair('boy:rail', boy, rail)
+
+    game_world.add_collision_pair('boy:back_ground', boy, back_ground)
 
 def finish():
     game_world.clear()
@@ -29,6 +31,7 @@ def finish():
 
 def update():
     game_world.update()
+    game_world.handle_collisions()
 
 def draw():
     clear_canvas()

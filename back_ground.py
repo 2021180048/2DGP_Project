@@ -27,12 +27,12 @@ class Start:
 
     @staticmethod
     def exit(back_ground, e):
+        back_ground.speed = 0
         pass
 
     @staticmethod
     def do(back_ground):
         if get_time() - back_ground.wait_time > 2.5:
-            back_ground.speed = 1
             back_ground.state_machine.handle_event(('TIME_OUT', 0))
         pass
 
@@ -81,7 +81,7 @@ class Upspeed:
         if int(back_ground.x) <= -800:
             back_ground.x = 800
         
-        if get_time() - back_ground.wait_time > 0.7:
+        if get_time() - back_ground.wait_time > 0.5:
             back_ground.speed += 1.0
             back_ground.wait_time += get_time()
 
@@ -98,11 +98,11 @@ class Upspeed:
 class StateMachine:
     def __init__(self, back_ground):
         self.back_ground = back_ground
-        self.cur_state = Start
+        self.cur_state = Move
         self.transitions = {
             Start: {time_out: Move},
             Move: {a_down: Upspeed},
-            Upspeed: {a_up: Move},
+            Upspeed: {a_up: Move, a_down: Upspeed},
         }
 
     def start(self):
@@ -131,6 +131,7 @@ class Back_ground:
     def __init__(self):
         self.x = 800
         self.y = 300
+        self.x1, self.y1, self.x2, self.y2 = 800, 300, 800, -150
         self.speed = 0.0
         self.wait_time = 0.0
         self.state_machine = StateMachine(self)
@@ -149,4 +150,17 @@ class Back_ground:
 
     def draw(self):
         self.state_machine.draw()
+        draw_rectangle(*self.get_bb())
         pass
+
+    def get_bb(self):
+        return 800 - self.x1, 300 - self.y1, 800 + self.x2, 300 + self.y2  # 튜플
+
+    def handle_collision(self, group, other):
+        if group == 'boy:back_ground':
+            pass
+
+    def handle_not_collision(self, group, other):
+        if group == 'boy:back_ground':
+            pass
+
