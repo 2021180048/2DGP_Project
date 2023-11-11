@@ -229,6 +229,7 @@ class Jump:
 
     @staticmethod
     def exit(boy, e):
+        print(boy.max_y)
         pass
 
     @staticmethod
@@ -240,10 +241,11 @@ class Jump:
             boy.bottom = 75 * 2
 
         
-        if get_time() - boy.wait_time >= 0.35:
+        if get_time() - boy.wait_time > 0.35:
             boy.state_machine.handle_event(('FALLING', 0))
         else:
             boy.y += JUMP_SPEED_PPS * game_framework.frame_time
+            boy.max_y = boy.y
             boy.rail_collision = 0
             boy.back_ground_collision = 0 #스페이스바 씺힘 때문
             pass
@@ -263,17 +265,19 @@ class Falling:
         boy.good = 0
         boy.bad = 0
         boy.ok = True
+        boy.timing = 0.3 * boy.max_y / 346
         pass
 
     @staticmethod
     def exit(boy, e):
+        print(get_time() - boy.wait_time)
         pass
 
     @staticmethod
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
 
-        if get_time() - boy.wait_time > 0.25:
+        if get_time() - boy.wait_time > boy.timing:
             if boy.event:
                 boy.good = 1
                 print('good')
@@ -331,7 +335,7 @@ class Railing:
                 boy.radian = 3.141592/180 * 0
 
         if boy.back_ground_collision == 1:
-            pass
+            boy.state_machine.handle_event(('BAD_FINISH', 0))
 
         if int(boy.frame) < 2:
             boy.left = int(boy.frame) * 81 + (81 * 0)
@@ -425,7 +429,7 @@ class StateMachine:
             Run: {time_out: Ride},
             Jump: {meter_out: Idle, falling: Falling},
             Falling: {meter_out: Idle, s_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish},
-            Railing: {s_up: Falling, space_down: Jump},
+            Railing: {s_up: Falling, space_down: Jump, bad_finish: Bad_Finish},
             Bad_Finish: {time_out: Idle},
             Good_Finish: {time_out: Idle},
         }
@@ -452,6 +456,7 @@ class StateMachine:
 class Boy:
     def __init__(self):
         self.x, self.y = 150, 200
+        self.max_y = 0
         self.x1, self.y1, self.x2, self.y2 = 25, 50, 30, -40
         self.frame = 0
         self.action = 0

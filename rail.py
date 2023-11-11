@@ -23,6 +23,8 @@ class Rail():
 
     def update(self):
         self.x -= RAIL_SPEED_PPS * game_framework.frame_time * self.speed
+        if int(self.x) <= -800:
+            self.x = 1600
         pass
 
     def draw(self):
