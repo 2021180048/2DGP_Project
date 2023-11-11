@@ -9,6 +9,7 @@ import title_mode
 def init():
     global boy
     global back_ground
+    global rail
     running = True
 
     boy = Boy()
@@ -45,6 +46,7 @@ def handle_events():
         else:
             boy.handle_event(event)
             back_ground.handle_event(event)
+            rail.handle_event(event)
 
 def pause():
     pass

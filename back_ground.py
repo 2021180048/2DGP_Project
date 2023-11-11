@@ -32,7 +32,7 @@ class Start:
     @staticmethod
     def do(back_ground):
         if get_time() - back_ground.wait_time > 2.5:
-            back_ground.speed = 2
+            back_ground.speed = 1
             back_ground.state_machine.handle_event(('TIME_OUT', 0))
         pass
 
