@@ -45,6 +45,12 @@ def a_down(e):
 def a_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_a
 
+def s_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_s
+
+def s_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_s
+
 def time_out(e):
     return e[0] == 'TIME_OUT'
 
@@ -56,8 +62,6 @@ def frame_out(e):
 
 def falling(e):
     return e[0] == 'Falling'
-
-# time_out = lambda e : e[0] == 'TIME_OUT'
 
 class Start:
     @staticmethod
@@ -136,7 +140,6 @@ class Idle:
 
     @staticmethod
     def draw(boy):
-        # boy.image.clip_draw(boy.left, boy.bottom, 80, 75, boy.x, boy.y, 120, 120)
         boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 75, boy.radian, '', boy.x, boy.y, 120, 120)
         pass
 
@@ -198,30 +201,6 @@ class Ride:
     def draw(boy):
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
 
-class Sleep:
-
-    @staticmethod
-    def enter(boy, e):
-        boy.frame = 0
-        pass
-
-    @staticmethod
-    def exit(boy, e):
-        pass
-
-    @staticmethod
-    def do(boy):
-        boy.frame = (boy.frame + 1) % 8
-
-    @staticmethod
-    def draw(boy):
-        if boy.face_dir == -1:
-            boy.image.clip_composite_draw(boy.frame * 100, 200, 100, 100,
-                                          -3.141592 / 2, '', boy.x + 25, boy.y - 25, 100, 100)
-        else:
-            boy.image.clip_composite_draw(boy.frame * 100, 300, 100, 100,
-                                          3.141592 / 2, '', boy.x - 25, boy.y - 25, 100, 100)
-
 class Jump:
 
     @staticmethod
@@ -246,14 +225,11 @@ class Jump:
 
         
         if get_time() - boy.wait_time >= 0.35:
-            boy.gravity()
+            boy.state_machine.handle_event(('Falling', 0))
         else:
             boy.y += JUMP_SPEED_PPS * game_framework.frame_time
             boy.rail_collision = 0
             boy.back_ground_collision = 0 #스페이스바 씺힘 때문
-
-        if boy.back_ground_collision == 1 or boy.rail_collision == 1:
-            boy.state_machine.handle_event(("METER_OUT", 0))
             pass
 
 
@@ -275,23 +251,60 @@ class Falling:
 
     @staticmethod
     def do(boy):
-        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 7
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
 
-        if boy.back_ground_collision != 1 and boy.rail_collision != 1:
+        if boy.back_ground_collision == 1:
+            boy.state_machine.handle_event(("METER_OUT", 0))
+        else:
             boy.gravity()
 
-        if int(boy.frame) < 9:
-            boy.left = int(boy.frame) * 81 + (81 * 12)
+        if int(boy.frame) < 7:
+            boy.left = int(boy.frame) * 81 + (81 * 13)
             boy.bottom = 75 * 2
-
-        if boy.back_ground_collision == 1 or boy.rail_collision == 1:
-            boy.state_machine.handle_event(("METER_OUT", 0))
-
         pass
 
     @staticmethod
     def draw(boy):
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        pass
+
+class Railing:
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        boy.rail_collision = 0
+        boy.back_ground_collision = 0
+        boy.radian = 0
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
+
+        if boy.rail_collision == 0 and boy.back_ground_collision == 0:
+            boy.gravity()
+
+        if boy.rail_collision == 1:
+            if int(boy.frame) % 2 == 0:
+                boy.radian = 3.141592/180 * 1
+            else:
+                boy.radian = 3.141592/180 * 0
+
+        if boy.back_ground_collision == 1:
+            pass
+
+        if int(boy.frame) < 2:
+            boy.left = int(boy.frame) * 81 + (81 * 0)
+            boy.bottom = 75 * 3
+        pass
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 80, boy.radian, '', boy.x, boy.y, 120, 120)
         pass
 
 class StateMachine:
@@ -301,11 +314,12 @@ class StateMachine:
         self.transitions = {
             Start: {meter_out: Run},
             Ride: {frame_out: Idle},
-            Idle: {a_down: UpSpeed, space_down: Jump, falling: Falling},
-            UpSpeed: {frame_out: Idle, a_up: Idle},
+            Idle: {right_down: UpSpeed, space_down: Jump, falling: Falling},
+            UpSpeed: {frame_out: Idle, right_up: Idle},
             Run: {time_out: Ride},
-            Jump: {meter_out: Idle},
-            Falling: {meter_out: Idle},
+            Jump: {meter_out: Idle, falling: Falling},
+            Falling: {meter_out: Idle, s_down: Railing},
+            Railing: {s_up: Falling, space_down: Jump},
         }
 
     def start(self):
@@ -329,7 +343,7 @@ class StateMachine:
 
 class Boy:
     def __init__(self):
-        self.x, self.y = 80, 200
+        self.x, self.y = 150, 200
         self.x1, self.y1, self.x2, self.y2 = 25, 50, 30, -40
         self.frame = 0
         self.action = 0

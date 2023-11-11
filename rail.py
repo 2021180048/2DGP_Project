@@ -7,6 +7,12 @@ RAIL_SPEED_MPM = RAIL_SPEED_KMPH * 1000.0 / 60.0
 RAIL_SPEED_MPS = RAIL_SPEED_MPM / 60.0
 RAIL_SPEED_PPS = RAIL_SPEED_MPS * PIXEL_PER_METER
 
+def right_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_RIGHT
+
+def right_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_RIGHT
+
 def a_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
 
@@ -93,8 +99,8 @@ class StateMachine:
         self.cur_state = Move
         self.transitions = {
             Start: {time_out: Move},
-            Move: {a_down: Upspeed},
-            Upspeed: {a_up: Move},
+            Move: {right_down: Upspeed},
+            Upspeed: {right_up: Move},
         }
 
     def start(self):
