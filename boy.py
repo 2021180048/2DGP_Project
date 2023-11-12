@@ -52,6 +52,12 @@ def s_down(e):
 def s_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_s
 
+def d_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_d
+
+def d_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_d
+
 def time_out(e):
     return e[0] == 'TIME_OUT'
 
@@ -164,6 +170,8 @@ class Run:
     @staticmethod
     def enter(boy, e):
         boy.frame = 0
+        game_world.objects[0][0].speed += 1
+        game_world.objects[1][0].speed += 1
         boy.wait_time = get_time()
         pass
 
@@ -265,7 +273,7 @@ class Falling:
         boy.good = 0
         boy.bad = 0
         boy.ok = True
-        boy.timing = 0.3 * boy.max_y / 346
+        boy.timing = 0.25 * boy.max_y / 345
         pass
 
     @staticmethod
@@ -417,10 +425,39 @@ class Good_Finish:
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
         pass
 
+class Trick:
+
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        boy.good = 0
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
+
+        if get_time() - boy.wait_time > 0.35:
+            boy.state_machine.handle_event(('TIME_OUT', 0))
+
+        if int(boy.frame) < 4:
+            boy.left = int(boy.frame) * 93 + (93 * 13)
+            boy.bottom = 0
+        pass
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        pass
+
 class StateMachine:
     def __init__(self, boy):
         self.boy = boy
-        self.cur_state = Idle
+        self.cur_state = Start
         self.transitions = {
             Start: {meter_out: Run},
             Ride: {frame_out: Idle},
@@ -432,6 +469,7 @@ class StateMachine:
             Railing: {s_up: Falling, space_down: Jump, bad_finish: Bad_Finish},
             Bad_Finish: {time_out: Idle},
             Good_Finish: {time_out: Idle},
+            Trick: {},
         }
 
     def start(self):
