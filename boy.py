@@ -427,29 +427,41 @@ class Good_Finish:
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
         pass
 
-class Trick:
+class Trick_1:
 
     @staticmethod
     def enter(boy, e):
         boy.frame = 0
+        boy.current_y = boy.y
+        boy.flag = False   
         pass
 
     @staticmethod
     def exit(boy, e):
-        boy.good = 0
         pass
 
     @staticmethod
     def do(boy):
-        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time* 0.8)
 
-        if get_time() - boy.wait_time > 0.35:
-            boy.state_machine.handle_event(('TIME_OUT', 0))
-
-        if int(boy.frame) < 4:
-            boy.left = int(boy.frame) * 93 + (93 * 13)
+        if int(boy.frame) < 10:
+            boy.left = int(boy.frame) * 100 + (100 * 3)
             boy.bottom = 0
         pass
+
+        if boy.flag == True:
+            boy.gravity()
+            pass
+
+        if boy.flag == False:
+            boy.y += JUMP_SPEED_PPS * game_framework.frame_time
+
+        if boy.y-boy.current_y >= 100:
+            boy.flag = True
+
+
+        if boy.back_ground_collision == 1:
+            boy.state_machine.handle_event(('GOOD_FINISH', 0))
 
     @staticmethod
     def draw(boy):
@@ -466,12 +478,12 @@ class StateMachine:
             Idle: {right_down: UpSpeed, space_down: Jump, falling: Falling},
             UpSpeed: {frame_out: Idle, right_up: Idle},
             Run: {time_out: Ride},
-            Jump: {meter_out: Idle, falling: Falling},
+            Jump: {meter_out: Idle, falling: Falling, d_down:Trick_1},
             Falling: {meter_out: Idle, s_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish},
             Railing: {s_up: Falling, space_down: Jump, bad_finish: Bad_Finish},
             Bad_Finish: {time_out: Idle},
             Good_Finish: {time_out: Idle},
-            Trick: {},
+            Trick_1: {good_finish: Good_Finish},
         }
 
     def start(self):
@@ -527,7 +539,7 @@ class Boy:
         pass
 
     def get_event(self,event):
-        if event.type == SDL_KEYDOWN and event.key == SDLK_a and self.ok == True:
+        if event.type == SDL_KEYDOWN and event.key == SDLK_f and self.ok == True:
             self.event = True
             self.ok = False
 
