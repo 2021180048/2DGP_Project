@@ -230,7 +230,7 @@ class Jump:
     @staticmethod
     def enter(boy, e):
         boy.frame = 0
-        boy.wait_time = get_time()
+        # boy.wait_time = get_time()
         boy.back_ground_collision = 0
         boy.rail_collision = 0
         pass
@@ -249,7 +249,8 @@ class Jump:
             boy.bottom = 75 * 2
 
         
-        if get_time() - boy.wait_time > 0.35:
+        # if get_time() - boy.wait_time > 0.35:
+        if boy.y >= 350:
             boy.state_machine.handle_event(('FALLING', 0))
         else:
             boy.y += JUMP_SPEED_PPS * game_framework.frame_time
@@ -457,7 +458,7 @@ class Trick:
 class StateMachine:
     def __init__(self, boy):
         self.boy = boy
-        self.cur_state = Start
+        self.cur_state = Idle
         self.transitions = {
             Start: {meter_out: Run},
             Ride: {frame_out: Idle},
