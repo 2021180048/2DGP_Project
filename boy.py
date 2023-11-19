@@ -233,6 +233,7 @@ class Jump:
         # boy.wait_time = get_time()
         boy.back_ground_collision = 0
         boy.rail_collision = 0
+        boy.current_y = boy.y
         pass
 
     @staticmethod
@@ -250,7 +251,7 @@ class Jump:
 
         
         # if get_time() - boy.wait_time > 0.35:
-        if boy.y >= 350:
+        if boy.y-boy.current_y >= 150:
             boy.state_machine.handle_event(('FALLING', 0))
         else:
             boy.y += JUMP_SPEED_PPS * game_framework.frame_time
