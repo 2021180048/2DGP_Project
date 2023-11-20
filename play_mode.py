@@ -58,7 +58,6 @@ def handle_events():
         else:
             boy.handle_event(event)
             boy.decide_landing(event)
-
 def pause():
     pass
 
