@@ -29,7 +29,6 @@ class Back_ground:
         self.x -= MAP_SPEED_PPS * game_framework.frame_time * self.speed
         if int(self.x) <= -800:
             self.x = 800
-        
         pass
 
     def draw(self):

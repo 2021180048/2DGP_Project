@@ -1,7 +1,8 @@
 from header import *
 import game_framework
 import game_world
-
+import play_mode
+from back_ground import Back_ground
 TIME_PER_ACTION = 0.5
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
@@ -233,6 +234,7 @@ class Jump:
         # boy.wait_time = get_time()
         boy.back_ground_collision = 0
         boy.rail_collision = 0
+        boy.landing_collision = 0
         boy.current_y = boy.y
         pass
 
@@ -272,8 +274,7 @@ class Falling:
         boy.frame = 0
         boy.rail_collision = 0
         boy.wait_time = get_time()
-        boy.good = 0
-        boy.bad = 0
+        boy.land = 0
         boy.ok = True
         boy.timing = 0.25 * boy.max_y / 345
         pass
@@ -287,23 +288,10 @@ class Falling:
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
 
-        if get_time() - boy.wait_time > boy.timing:
-            if boy.event:
-                boy.good = 1
-                print('good')
-                boy.event = False
-        else:
-            if boy.event:
-                boy.bad = 1
-                print('bad')
-                boy.event = False
-
         if boy.back_ground_collision == 1:
-            if boy.good == 1:
+            if boy.land == 1:
                 boy.state_machine.handle_event(('GOOD_FINISH', 0))
-            if boy.bad == 1:
-                boy.state_machine.handle_event(('BAD_FINISH', 0))
-            if boy.good == 0 and boy.bad == 0:
+            if boy.land == 0:
                 boy.state_machine.handle_event(('BAD_FINISH', 0))
         else:
             boy.gravity()
@@ -456,7 +444,7 @@ class Trick_1:
         if boy.flag == False:
             boy.y += JUMP_SPEED_PPS * game_framework.frame_time
 
-        if boy.y-boy.current_y >= 100:
+        if boy.y-boy.current_y >= 50:
             boy.flag = True
 
 
@@ -479,11 +467,11 @@ class StateMachine:
             UpSpeed: {frame_out: Idle, right_up: Idle},
             Run: {time_out: Ride},
             Jump: {meter_out: Idle, falling: Falling, d_down:Trick_1},
-            Falling: {meter_out: Idle, s_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish},
+            Falling: {meter_out: Idle, s_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish, d_down:Trick_1},
             Railing: {s_up: Falling, space_down: Jump, bad_finish: Bad_Finish},
             Bad_Finish: {time_out: Idle},
             Good_Finish: {time_out: Idle},
-            Trick_1: {good_finish: Good_Finish},
+            Trick_1: {good_finish: Good_Finish, bad_finish: Bad_Finish},
         }
 
     def start(self):
@@ -516,11 +504,13 @@ class Boy:
         self.bottom = 0
         self.dir = 0
         self.back_ground_collision = 0
+        self.landing_collision = 0
         self.down_speed = 0
         self.bad = 0
         self.good = 0
-        self.event = False
+        self.event = 0
         self.ok = False
+        self.land = 0
         self.image = load_image('skater_sprite_sheet.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
@@ -538,11 +528,6 @@ class Boy:
         draw_rectangle(*self.get_bb())
         pass
 
-    def get_event(self,event):
-        if event.type == SDL_KEYDOWN and event.key == SDLK_f and self.ok == True:
-            self.event = True
-            self.ok = False
-
     def get_bb(self):
         return self.x - self.x1, self.y - self.y1, self.x + self.x2, self.y + self.y2  # 튜플
     
@@ -555,6 +540,11 @@ class Boy:
             self.back_ground_collision = 1
             pass
 
+        if group == 'boy:landing':
+            self.landing_collision = 1
+            print('1')
+            pass
+
     def handle_not_collision(self, group, other):
         if group == 'boy:rail':
             self.rail_collision = 0
@@ -564,5 +554,22 @@ class Boy:
             self.back_ground_collision = 0
             pass
 
+        if group == 'boy:landing':
+            self.landing_collision = 0
+            print('0')
+            pass
+
     def gravity(self):
         self.y -= JUMP_SPEED_PPS * game_framework.frame_time
+    
+    def decide_landing(self, event):
+        if event.type == SDL_KEYDOWN and event.key == SDLK_SPACE and self.ok == True:
+            if self.landing_collision == 1:
+                self.land = 1
+                print('good')
+                pass
+            if self.landing_collision == 0:
+                self.land = 0
+                print('bad')
+                pass
+            self.ok = False

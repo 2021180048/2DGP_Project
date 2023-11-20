@@ -2,14 +2,17 @@ from header import *
 from boy import Boy
 from back_ground import Back_ground
 from rail import Rail
+from landing import Landing
 import game_world
 import game_framework
 import title_mode
+
 
 def init():
     global boy
     global back_ground
     global rail
+    global landing
     running = True
 
     boy = Boy()
@@ -18,12 +21,17 @@ def init():
     back_ground = Back_ground()
     game_world.add_object(back_ground, 0)
 
+    landing = Landing()
+    game_world.add_object(landing, 0)
+
     rail = Rail()
     game_world.add_object(rail, 1)
 
     game_world.add_collision_pair('boy:rail', boy, rail)
 
     game_world.add_collision_pair('boy:back_ground', boy, back_ground)
+
+    game_world.add_collision_pair('boy:landing', boy, landing)
 
     game_world.add_collision_pair('back_ground:rail', back_ground, rail)
 
@@ -49,9 +57,7 @@ def handle_events():
             game_framework.change_mode(title_mode)
         else:
             boy.handle_event(event)
-            boy.get_event(event)
-            # back_ground.handle_event(event)
-            # rail.handle_event(event)
+            boy.decide_landing(event)
 
 def pause():
     pass
