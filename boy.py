@@ -37,6 +37,12 @@ def left_down(e):
 def left_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LEFT
 
+def down_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_DOWN
+
+def down_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_DOWN
+
 def space_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
 
@@ -463,7 +469,7 @@ class Flip:
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time * 0.6)
 
         if int(boy.frame) < 8:
-            boy.left = int(boy.frame) * 81
+            boy.left = int(boy.frame) * 81 + (81 * 16)
             boy.bottom = 77 * 4
         pass
 
@@ -484,6 +490,98 @@ class Flip:
         boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
         pass
 
+class Backside_180:
+
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        boy.flag = False
+        boy.ok = True
+        boy.land = 0
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time * 0.6)
+
+        if int(boy.frame) < 8:
+            boy.left = int(boy.frame) * 81 + (81 * 8)
+            boy.bottom = 77 * 4
+        pass
+
+        if boy.flag == True:
+            boy.gravity()
+            pass
+
+        if boy.flag == False:
+            boy.y += JUMP_SPEED_PPS * game_framework.frame_time
+
+        if boy.y-boy.seed_y >= 150:
+            boy.flag = True
+
+        boy.dicide_landing()
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
+        pass
+
+class Lie:
+
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
+
+        if int(boy.frame) < 7:
+            boy.left = int(boy.frame) * 197
+            boy.bottom = 77 * 8 + 2
+        pass
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
+        pass
+
+class Lie_Up:
+
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
+
+        if int(boy.frame) < 7:
+            boy.left = (7 - int(boy.frame)) * 197
+            boy.bottom = 77 * 8 + 2
+        else:
+            boy.state_machine.handle_event(("FRAME_OUT",0))
+        pass
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
+        pass
+
 class StateMachine:
     def __init__(self, boy):
         self.boy = boy
@@ -491,16 +589,19 @@ class StateMachine:
         self.transitions = {
             Start: {meter_out: Run},
             Ride: {frame_out: Idle},
-            Idle: {right_down: UpSpeed, space_down: Jump, falling: Falling},
+            Idle: {right_down: UpSpeed, space_down: Jump, falling: Falling, down_down: Lie},
             UpSpeed: {frame_out: Idle, right_up: Idle},
             Run: {time_out: Ride},
-            Jump: {meter_out: Idle, falling: Falling, d_down: Hard_Flip, a_down: Flip},
-            Falling: {meter_out: Idle, s_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish},
-            Railing: {s_up: Falling, space_down: Jump, bad_finish: Bad_Finish},
+            Jump: {meter_out: Idle, falling: Falling, d_down: Hard_Flip, a_down: Flip, s_down: Backside_180},
+            Falling: {meter_out: Idle, down_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish},
+            Railing: {down_up: Falling, space_down: Jump, bad_finish: Bad_Finish},
             Bad_Finish: {time_out: Idle},
             Good_Finish: {time_out: Idle},
             Hard_Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish},
             Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish},
+            Backside_180: {good_finish: Good_Finish, bad_finish: Bad_Finish},
+            Lie: {down_up: Lie_Up},
+            Lie_Up: {frame_out: Idle},
         }
 
     def start(self):
@@ -600,10 +701,8 @@ class Boy:
         if event.type == SDL_KEYDOWN and event.key == SDLK_SPACE and self.ok == True:
             if self.landing_collision == 1:
                 self.land = 1
-                print('good')
                 pass
             if self.landing_collision == 0:
                 self.land = 0
-                print('bad')
                 pass
             self.ok = False
