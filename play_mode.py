@@ -57,7 +57,7 @@ def handle_events():
             game_framework.change_mode(title_mode)
         else:
             boy.handle_event(event)
-            boy.decide_landing(event)
+            boy.event_landing(event)
 def pause():
     pass
 

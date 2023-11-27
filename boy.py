@@ -28,20 +28,20 @@ JUMP_SPEED_PPS = JUMP_SPEED_MPS * PIXEL_PER_METER
 def right_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_RIGHT
 
-
 def right_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_RIGHT
 
-
 def left_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_LEFT
-
 
 def left_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LEFT
 
 def space_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
+
+def space_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_SPACE
 
 def a_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
@@ -247,8 +247,6 @@ class Jump:
     @staticmethod
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
-        # boy.radian += 1
-        boy.rotation()
 
         if int(boy.frame) < 9:
             boy.left = int(boy.frame) * 80 + (82 * 10)
@@ -284,9 +282,8 @@ class Falling:
     @staticmethod
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
-        boy.event_landing()
+        boy.dicide_landing()
         boy.gravity()
-        boy.rotation()
 
         if int(boy.frame) < 7:
             boy.left = int(boy.frame) * 81 + (81 * 13)
@@ -295,8 +292,7 @@ class Falling:
 
     @staticmethod
     def draw(boy):
-        # boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
-        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 80, boy.radian, '', boy.x, boy.y, 120, 120)
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
         pass
 
 class Railing:
@@ -410,7 +406,7 @@ class Good_Finish:
         boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
         pass
 
-class Trick_1:
+class Hard_Flip:
 
     @staticmethod
     def enter(boy, e):
@@ -418,7 +414,6 @@ class Trick_1:
         boy.flag = False
         boy.ok = True
         boy.land = 0
-        boy.landing_collision = 0
         pass
 
     @staticmethod
@@ -432,7 +427,44 @@ class Trick_1:
         if int(boy.frame) < 10:
             boy.left = int(boy.frame) * 100 + (100 * 3)
             boy.bottom = 0
-            boy.y -= JUMP_SPEED_PPS * game_framework.frame_time * 0.1
+        pass
+
+        if boy.flag == True:
+            boy.gravity()
+        else:
+            boy.y += JUMP_SPEED_PPS * game_framework.frame_time
+
+        if boy.y-boy.seed_y >= 150:
+            boy.flag = True
+
+        boy.dicide_landing()
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        pass
+
+class Flip:
+
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        boy.flag = False
+        boy.ok = True
+        boy.land = 0
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time * 0.6)
+
+        if int(boy.frame) < 8:
+            boy.left = int(boy.frame) * 81
+            boy.bottom = 77 * 4
         pass
 
         if boy.flag == True:
@@ -444,14 +476,12 @@ class Trick_1:
 
         if boy.y-boy.seed_y >= 150:
             boy.flag = True
-        else:
-            boy.landing_collision = 0
 
-        boy.event_landing()
+        boy.dicide_landing()
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
         pass
 
 class StateMachine:
@@ -464,12 +494,13 @@ class StateMachine:
             Idle: {right_down: UpSpeed, space_down: Jump, falling: Falling},
             UpSpeed: {frame_out: Idle, right_up: Idle},
             Run: {time_out: Ride},
-            Jump: {meter_out: Idle, falling: Falling, d_down: Trick_1},
-            Falling: {meter_out: Idle, s_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish, d_down:Trick_1},
+            Jump: {meter_out: Idle, falling: Falling, d_down: Hard_Flip, a_down: Flip},
+            Falling: {meter_out: Idle, s_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish},
             Railing: {s_up: Falling, space_down: Jump, bad_finish: Bad_Finish},
             Bad_Finish: {time_out: Idle},
             Good_Finish: {time_out: Idle},
-            Trick_1: {good_finish: Good_Finish, bad_finish: Bad_Finish},
+            Hard_Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish},
+            Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish},
         }
 
     def start(self):
@@ -501,7 +532,7 @@ class Boy:
         self.back_ground_collision = 0
         self.landing_collision = 0
         self.down_speed = 0
-        self.event = 0
+        self.event = None
         self.ok = False
         self.land = 0
         self.seed_y = 0
@@ -539,7 +570,6 @@ class Boy:
 
         if group == 'boy:landing':
             self.landing_collision = 1
-            print('1')
             pass
 
     def handle_not_collision(self, group, other):
@@ -553,13 +583,12 @@ class Boy:
 
         if group == 'boy:landing':
             self.landing_collision = 0
-            print('0')
             pass
 
     def gravity(self):
         self.y -= JUMP_SPEED_PPS * game_framework.frame_time * 0.8
 
-    def event_landing(self):
+    def dicide_landing(self):
         if self.back_ground_collision == 1:
             if self.land == 1:
                 self.state_machine.handle_event(('GOOD_FINISH', 0))
@@ -567,7 +596,7 @@ class Boy:
                 self.state_machine.handle_event(('BAD_FINISH', 0))
 
     
-    def decide_landing(self, event):
+    def event_landing(self, event):
         if event.type == SDL_KEYDOWN and event.key == SDLK_SPACE and self.ok == True:
             if self.landing_collision == 1:
                 self.land = 1
@@ -578,8 +607,3 @@ class Boy:
                 print('bad')
                 pass
             self.ok = False
-
-    def rotation(self):
-        if self.event.type == SDL_KEYDOWN and self.event.key == SDLK_LEFT:
-            self.degree += (DEGREE_PER_TIME * game_framework.frame_time ) % 361
-            self.radian = self.degree * (3.14 / 180)

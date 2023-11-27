@@ -4,7 +4,7 @@ import play_mode
 
 def init():
     global image
-    image = load_image('title.png')
+    image = load_image('Title_Screen.png')
     pass
 
 
@@ -18,7 +18,7 @@ def update():
 
 def draw():
     clear_canvas()
-    image.draw(800, 300)
+    image.draw(800, 300, 600, 600)
     update_canvas()
     pass
 
