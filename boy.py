@@ -571,10 +571,70 @@ class Lie_Up:
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
 
         if int(boy.frame) < 7:
-            boy.left = (7 - int(boy.frame)) * 197
+            boy.left = (6 - int(boy.frame)) * 197
             boy.bottom = 77 * 8 + 2
         else:
             boy.state_machine.handle_event(("FRAME_OUT",0))
+        pass
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
+        pass
+
+class Fall:
+
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        boy.wait_time = get_time()
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
+
+        if int(boy.frame) < 14:
+            boy.left = int(boy.frame) * 199
+            boy.bottom = 77 * 6
+        elif 14 <= int(boy.frame) <15:
+            boy.left = (int(boy.frame)-14) * 197 + (80 * 2)
+            boy.bottom = 77 * 3
+
+        if get_time() - boy.wait_time > 2.0:
+            boy.state_machine.handle_event(("TIME_OUT",0))
+        pass
+
+    @staticmethod
+    def draw(boy):
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
+        pass
+
+class Wake_Up:
+
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        boy.wait_time = get_time()
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time * 0.3)
+
+        if int(boy.frame) <4:
+            boy.left = int(boy.frame) * 197 + (80 * 2)
+            boy.bottom = 77 * 3
+        if get_time() - boy.wait_time > 2.0:
+            boy.state_machine.handle_event(("TIME_OUT",0))
         pass
 
     @staticmethod
@@ -602,6 +662,8 @@ class StateMachine:
             Backside_180: {good_finish: Good_Finish, bad_finish: Bad_Finish},
             Lie: {down_up: Lie_Up},
             Lie_Up: {frame_out: Idle},
+            Fall: {time_out: Wake_Up},
+            Wake_Up: {time_out: Run},
         }
 
     def start(self):
