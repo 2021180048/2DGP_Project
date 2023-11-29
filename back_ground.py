@@ -16,8 +16,11 @@ class Back_ground:
         self.y = 300
         self.x1, self.y1, self.x2, self.y2 = 800, 300, 800, -150
         self.speed = 0
+        self.score = 0
+        self.buffer = 0
         self.wait_time = 0.0
         self.bad = 0
+        self.font = load_font('ENCR10B.TTF', 30)
 
         if Back_ground.image == None:
             self.image = load_image('back_ground.jpg')
@@ -34,6 +37,9 @@ class Back_ground:
     def draw(self):
         self.image.draw(self.x, self.y, 1600, 600)
         self.image.draw(self.x + 1600, self.y, 1600, 600)
+        self.font.draw(100, 550, f'speed = {self.speed:02d}', (0, 0, 0))
+        self.font.draw(100, 500, f'score = {self.score:02d}', (0, 0, 0))
+
 
         draw_rectangle(*self.get_bb())
         pass

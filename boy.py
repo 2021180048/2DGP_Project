@@ -129,7 +129,7 @@ class UpSpeed:
         boy.left = int(boy.frame) * 81 + 80
         boy.bottom = 75 * 5
 
-        if get_time() - boy.wait_time > 0.5:
+        if get_time() - boy.wait_time > 0.7 and game_world.objects[0][0].speed < 10:
             game_world.objects[0][0].speed += 1
             game_world.objects[1][0].speed += 1
             boy.wait_time += (get_time() - boy.wait_time)
@@ -308,6 +308,7 @@ class Railing:
         boy.rail_collision = 0
         boy.back_ground_collision = 0
         boy.radian = 0
+        game_world.objects[0][0].buffer += 10
         pass
 
     @staticmethod
@@ -348,8 +349,15 @@ class Bad_Finish:
         boy.rail_collision = 0
         boy.back_ground_collision = 0
         boy.wait_time = get_time()
-        game_world.objects[0][0].speed -= 1
-        game_world.objects[1][0].speed -= 1
+        game_world.objects[0][0].buffer = 0
+        if(game_world.objects[0][0].speed > 1):
+            game_world.objects[0][0].speed -= 1
+            game_world.objects[1][0].speed -= 1
+        
+        if(game_world.objects[0][0].score >= 10):
+            game_world.objects[0][0].score -= 10
+        else:
+            game_world.objects[0][0].score = 0
         pass
 
     @staticmethod
@@ -388,6 +396,8 @@ class Good_Finish:
         boy.back_ground_collision = 0
         boy.radian = 0
         boy.wait_time = get_time()
+        game_world.objects[0][0].score += game_world.objects[0][0].buffer
+        game_world.objects[0][0].buffer = 0
         pass
 
     @staticmethod
@@ -420,6 +430,7 @@ class Hard_Flip:
         boy.flag = False
         boy.ok = True
         boy.land = 0
+        game_world.objects[0][0].buffer += 30
         pass
 
     @staticmethod
@@ -458,6 +469,7 @@ class Flip:
         boy.flag = False
         boy.ok = True
         boy.land = 0
+        game_world.objects[0][0].buffer += 20
         pass
 
     @staticmethod
@@ -498,6 +510,7 @@ class Backside_180:
         boy.flag = False
         boy.ok = True
         boy.land = 0
+        game_world.objects[0][0].buffer += 20
         pass
 
     @staticmethod
@@ -590,6 +603,11 @@ class Fall:
         game_world.objects[1][0].speed = 0
         boy.frame = 0
         boy.wait_time = get_time()
+        game_world.objects[0][0].buffer = 0
+        if(game_world.objects[0][0].score >= 50):
+            game_world.objects[0][0].score -= 50
+        else:
+            game_world.objects[0][0].score = 0
         pass
 
     @staticmethod
@@ -652,6 +670,7 @@ class Rotation:
         boy.flag = False
         boy.ok = True
         boy.land = 0
+        game_world.objects[0][0].buffer += 40
         pass
 
     @staticmethod
