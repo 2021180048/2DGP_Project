@@ -308,7 +308,7 @@ class Railing:
         boy.rail_collision = 0
         boy.back_ground_collision = 0
         boy.radian = 0
-        game_world.objects[0][0].buffer += 10
+        game_world.objects[0][0].score += 10
         pass
 
     @staticmethod
