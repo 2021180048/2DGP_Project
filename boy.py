@@ -2,13 +2,13 @@ from header import *
 import game_framework
 import game_world
 import play_mode
-from back_ground import Back_ground
+
 TIME_PER_ACTION = 0.5
 ACTION_PER_TIME = 1.0 / TIME_PER_ACTION
 FRAMES_PER_ACTION = 8
 FRAMES_PER_TIME = ACTION_PER_TIME * FRAMES_PER_ACTION
 
-DEGREE_PER_TIME = 500
+DEGREE_PER_TIME = 400
 
 PIXEL_PER_METER = 100
 
@@ -85,10 +85,14 @@ def bad_finish(e):
 def good_finish(e):
     return e[0] == 'GOOD_FINISH'
 
+def fall_out(e):
+    return e[0] == 'FALL_OUT'
+
 class Start:
     @staticmethod
     def enter(boy, e):
         boy.frame = 0
+        boy.speed = 1
         boy.wait_time = get_time()
         pass
 
@@ -99,7 +103,6 @@ class Start:
     @staticmethod
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 6
-        boy.x += RUN_SPEED_PPS * game_framework.frame_time
         boy.left = int(boy.frame)*200 + 80
         boy.bottom = 780
         if get_time() - boy.wait_time > 2.5:
@@ -108,7 +111,9 @@ class Start:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, sx, sy, 120, 120)
         pass
 
 class UpSpeed:
@@ -129,16 +134,19 @@ class UpSpeed:
         boy.left = int(boy.frame) * 81 + 80
         boy.bottom = 75 * 5
 
-        if get_time() - boy.wait_time > 0.7 and game_world.objects[0][0].speed < 10:
-            game_world.objects[0][0].speed += 1
-            game_world.objects[1][0].speed += 1
+        if get_time() - boy.wait_time > 0.7 and boy.speed < 10:
+            boy.speed += 2
             boy.wait_time += (get_time() - boy.wait_time)
            
+        if boy.speed > 10:
+            boy.speed = 10
 
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, sx, sy, 120, 120)
         pass
 
 class Idle:
@@ -171,7 +179,9 @@ class Idle:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 75, boy.radian, '', boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 75, boy.radian, '', sx, sy, 120, 120)
         pass
 
 class Run:
@@ -179,8 +189,7 @@ class Run:
     @staticmethod
     def enter(boy, e):
         boy.frame = 0
-        game_world.objects[0][0].speed += 1
-        game_world.objects[1][0].speed += 1
+        boy.speed = 1
         boy.wait_time = get_time()
         pass
 
@@ -199,7 +208,9 @@ class Run:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, sx, sy, 120, 120)
 
 class Ride:
 
@@ -232,7 +243,9 @@ class Ride:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, sx, sy, 120, 120)
 
 class Jump:
 
@@ -269,8 +282,9 @@ class Jump:
 
     @staticmethod
     def draw(boy):
-        # boy.image.clip_draw(boy.left, boy.bottom, 80, 75, boy.x, boy.y, 120, 120)
-        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 75, boy.radian, '', boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom        
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 75, sx, sy, 120, 120)
 
 class Falling:
     @staticmethod
@@ -291,14 +305,17 @@ class Falling:
         boy.dicide_landing()
         boy.gravity()
 
-        if int(boy.frame) < 7:
+        if int(boy.frame) < 6:
             boy.left = int(boy.frame) * 81 + (81 * 13)
             boy.bottom = 75 * 2
         pass
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        # boy.image.clip_draw(boy.left, boy.bottom, 80, 80, sx, sy, 120, 120)
+        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 70, boy.radian, '', sx, sy, 120, 120)
         pass
 
 class Railing:
@@ -308,7 +325,7 @@ class Railing:
         boy.rail_collision = 0
         boy.back_ground_collision = 0
         boy.radian = 0
-        game_world.objects[0][0].score += 10
+        play_mode.back_ground.score += 10
         pass
 
     @staticmethod
@@ -338,7 +355,9 @@ class Railing:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 80, boy.radian, '', boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 80, boy.radian, '', sx, sy, 120, 120)
         pass
 
 class Bad_Finish:
@@ -349,15 +368,14 @@ class Bad_Finish:
         boy.rail_collision = 0
         boy.back_ground_collision = 0
         boy.wait_time = get_time()
-        game_world.objects[0][0].buffer = 0
-        if(game_world.objects[0][0].speed > 1):
-            game_world.objects[0][0].speed -= 1
-            game_world.objects[1][0].speed -= 1
+        play_mode.back_ground.buffer = 0
+        if(boy.speed > 1):
+            boy.speed -= 1
         
-        if(game_world.objects[0][0].score >= 10):
-            game_world.objects[0][0].score -= 10
+        if(play_mode.back_ground.score >= 10):
+            play_mode.back_ground.score -= 10
         else:
-            game_world.objects[0][0].score = 0
+            play_mode.back_ground.score = 0
         pass
 
     @staticmethod
@@ -383,7 +401,9 @@ class Bad_Finish:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, sx, sy, 120, 120)
         pass
 
 class Good_Finish:
@@ -396,8 +416,8 @@ class Good_Finish:
         boy.back_ground_collision = 0
         boy.radian = 0
         boy.wait_time = get_time()
-        game_world.objects[0][0].score += game_world.objects[0][0].buffer
-        game_world.objects[0][0].buffer = 0
+        play_mode.back_ground.score += play_mode.back_ground.buffer
+        play_mode.back_ground.buffer = 0
         pass
 
     @staticmethod
@@ -419,7 +439,9 @@ class Good_Finish:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, sx, sy, 120, 120)
         pass
 
 class Hard_Flip:
@@ -430,7 +452,7 @@ class Hard_Flip:
         boy.flag = False
         boy.ok = True
         boy.land = 0
-        game_world.objects[0][0].buffer += 30
+        play_mode.back_ground.buffer += 30
         pass
 
     @staticmethod
@@ -458,7 +480,9 @@ class Hard_Flip:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, sx, sy, 120, 120)
         pass
 
 class Flip:
@@ -469,7 +493,7 @@ class Flip:
         boy.flag = False
         boy.ok = True
         boy.land = 0
-        game_world.objects[0][0].buffer += 20
+        play_mode.back_ground.buffer += 20
         pass
 
     @staticmethod
@@ -499,7 +523,9 @@ class Flip:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, sx, sy, 120, 120)
         pass
 
 class Backside_180:
@@ -510,7 +536,7 @@ class Backside_180:
         boy.flag = False
         boy.ok = True
         boy.land = 0
-        game_world.objects[0][0].buffer += 20
+        play_mode.back_ground.buffer += 20
         pass
 
     @staticmethod
@@ -540,7 +566,9 @@ class Backside_180:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, sx, sy, 120, 120)
         pass
 
 class Lie:
@@ -565,7 +593,9 @@ class Lie:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, sx, sy, 120, 120)
         pass
 
 class Lie_Up:
@@ -592,22 +622,23 @@ class Lie_Up:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, sx, sy, 120, 120)
         pass
 
-class Fall:
+class Fall_OUT:
 
     @staticmethod
     def enter(boy, e):
-        game_world.objects[0][0].speed = 0
-        game_world.objects[1][0].speed = 0
+        boy.speed = 0
         boy.frame = 0
         boy.wait_time = get_time()
-        game_world.objects[0][0].buffer = 0
-        if(game_world.objects[0][0].score >= 50):
-            game_world.objects[0][0].score -= 50
+        play_mode.back_ground.buffer = 0
+        if(play_mode.back_ground.score >= 50):
+            play_mode.back_ground.score -= 50
         else:
-            game_world.objects[0][0].score = 0
+            play_mode.back_ground.score = 0
         pass
 
     @staticmethod
@@ -631,7 +662,9 @@ class Fall:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom        
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, sx, sy, 110, 110)
         pass
 
 class Wake_Up:
@@ -659,7 +692,9 @@ class Wake_Up:
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 70, sx, sy, 110, 110)
         pass
 
 class Rotation:
@@ -670,7 +705,7 @@ class Rotation:
         boy.flag = False
         boy.ok = True
         boy.land = 0
-        game_world.objects[0][0].buffer += 40
+        play_mode.back_ground.buffer += 40
         pass
 
     @staticmethod
@@ -679,13 +714,14 @@ class Rotation:
 
     @staticmethod
     def do(boy):
-        boy.degree = (boy.degree + DEGREE_PER_TIME * game_framework.frame_time)
+        boy.degree = (boy.degree + DEGREE_PER_TIME * game_framework.frame_time) % 360
 
-        if boy.degree < 360:
-            boy.radian = (boy.degree * math.pi/180)
-            boy.left = 95 * 2
-            boy.bottom = 0
-        pass
+        boy.dicide_landing()
+
+        boy.radian = (boy.degree * math.pi/180)
+        boy.left = 95 * 2
+        boy.bottom = 0
+    
         if boy.flag == True:
             boy.gravity()
             pass
@@ -696,13 +732,13 @@ class Rotation:
         if boy.y-boy.seed_y >= 150:
             boy.flag = True
 
-        boy.dicide_landing()
-
 
     @staticmethod
     def draw(boy):
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
         # boy.image.clip_draw(boy.left, boy.bottom, 80, 70, boy.x, boy.y, 120, 120)
-        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 70, boy.radian, '', boy.x, boy.y, 110, 110)
+        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 70, boy.radian, '', sx, sy, 110, 110)
         pass
 
 class StateMachine:
@@ -716,7 +752,7 @@ class StateMachine:
             UpSpeed: {frame_out: Idle, right_up: Idle},
             Run: {time_out: Ride},
             Jump: {meter_out: Idle, falling: Falling, d_down: Hard_Flip, a_down: Flip, s_down: Backside_180, left_down: Rotation},
-            Falling: {meter_out: Idle, down_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish},
+            Falling: {meter_out: Idle, down_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish, fall_out: Fall_OUT},
             Railing: {down_up: Falling, space_down: Jump, bad_finish: Bad_Finish},
             Bad_Finish: {time_out: Idle},
             Good_Finish: {time_out: Idle},
@@ -725,9 +761,9 @@ class StateMachine:
             Backside_180: {good_finish: Good_Finish, bad_finish: Bad_Finish},
             Lie: {down_up: Lie_Up},
             Lie_Up: {frame_out: Idle},
-            Fall: {time_out: Wake_Up},
+            Fall_OUT: {time_out: Wake_Up},
             Wake_Up: {time_out: Run},
-            Rotation: {good_finish: Good_Finish, bad_finish: Fall}
+            Rotation: {good_finish: Good_Finish, bad_finish: Fall_OUT, left_up: Falling, fall_out: Fall_OUT}
         }
 
     def start(self):
@@ -750,7 +786,7 @@ class StateMachine:
 
 class Boy:
     def __init__(self):
-        self.x, self.y = 150, 200
+        self.x, self.y = 150, 2770
         self.x1, self.y1, self.x2, self.y2 = 25, 50, 30, -40
         self.frame = 0
         self.left = 0
@@ -764,12 +800,15 @@ class Boy:
         self.land = 0
         self.seed_y = 0
         self.degree = 0
+        self.speed = 0
         self.image = load_image('skater_sprite_sheet.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
 
     def update(self):
+        self.sx, self.sy = self.x - play_mode.back_ground.window_left, self.y - play_mode.back_ground.window_bottom          
         self.state_machine.update()
+        self.x += RUN_SPEED_PPS * game_framework.frame_time * self.speed
         pass
 
     def handle_event(self, event):
@@ -777,13 +816,13 @@ class Boy:
         self.event = event
         pass
 
-    def draw(self):
+    def draw(self):      
         self.state_machine.draw()
         draw_rectangle(*self.get_bb())
         pass
 
     def get_bb(self):
-        return self.x - self.x1, self.y - self.y1, self.x + self.x2, self.y + self.y2  # 튜플
+        return self.sx - self.x1, self.sy - self.y1, self.sx + self.x2, self.sy + self.y2  # 튜플
     
     def handle_collision(self, group, other):
         if group == 'boy:rail':
@@ -816,10 +855,19 @@ class Boy:
 
     def dicide_landing(self):
         if self.back_ground_collision == 1:
-            if self.land == 1:
-                self.state_machine.handle_event(('GOOD_FINISH', 0))
-            if self.land == 0:
-                self.state_machine.handle_event(('BAD_FINISH', 0))
+            if 45 <= self.degree <= 315:
+                self.degree = 0
+                self.state_machine.handle_event(('FALL_OUT', 0))
+            else:
+                if self.land == 1:
+                    self.state_machine.handle_event(('GOOD_FINISH', 0))
+                if self.land == 0:
+                    if self.degree == 0:
+                        self.state_machine.handle_event(('BAD_FINISH', 0))
+                    else:
+                        self.degree = 0
+                        self.state_machine.handle_event(('FALL_OUT', 0))
+                
 
     
     def event_landing(self, event):

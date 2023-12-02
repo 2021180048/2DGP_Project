@@ -15,11 +15,11 @@ def init():
     global landing
     running = True
 
-    boy = Boy()
-    game_world.add_object(boy, 2)
-
     back_ground = Back_ground()
     game_world.add_object(back_ground, 0)
+
+    boy = Boy()
+    game_world.add_object(boy, 2)    
 
     landing = Landing()
     game_world.add_object(landing, 0)

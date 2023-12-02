@@ -1,5 +1,6 @@
 from header import *
 import game_framework
+import play_mode
 
 PIXEL_PER_METER = 100
 MAP_SPEED_KMPH = 2.0
@@ -11,41 +12,55 @@ class Back_ground:
     
     image = None
     
+    
     def __init__(self):
-        self.x = 800
-        self.y = 300
-        self.x1, self.y1, self.x2, self.y2 = 800, 300, 800, -150
-        self.speed = 0
+        if Back_ground.image == None:
+            #self.image = load_image('back_ground.jpg')
+            self.image = load_image('back_ground_new.png')
+
+        self.x = 0
+        self.y = 0
         self.score = 0
         self.buffer = 0
         self.wait_time = 0.0
         self.bad = 0
+        self.cw = get_canvas_width()
+        self.ch = get_canvas_height()
+        self.w = self.image.w # 배경의 너비
+        self.h = self.image.h # 배경의 높이
         self.font = load_font('ENCR10B.TTF', 30)
-
-        if Back_ground.image == None:
-            self.image = load_image('back_ground.jpg')
     
     def handle_event(self, event):
         pass
 
     def update(self):
-        self.x -= MAP_SPEED_PPS * game_framework.frame_time * self.speed
-        if int(self.x) <= -800:
-            self.x = 800
-        pass
+        self.window_left = clamp(0, int(play_mode.boy.x) - 300, self.w - self.cw)
+        self.window_bottom = clamp(0, int(play_mode.boy.y) - self.ch // 2, self.h - self.ch)
 
     def draw(self):
-        self.image.draw(self.x, self.y, 1600, 600)
-        self.image.draw(self.x + 1600, self.y, 1600, 600)
-        self.font.draw(100, 550, f'speed = {self.speed:02d}', (0, 0, 0))
+        self.image.clip_draw_to_origin(self.window_left, self.window_bottom, self.cw, self.ch, 0, 0)
+        # self.image.draw(self.x + 1600, self.y, 1600, 600)
+        self.font.draw(100, 550, f'speed = {play_mode.boy.speed:02d}', (0, 0, 0))
         self.font.draw(100, 500, f'score = {self.score:02d}', (0, 0, 0))
-
-
         draw_rectangle(*self.get_bb())
         pass
 
     def get_bb(self):
-        return 800 - self.x1, 300 - self.y1, 800 + self.x2, 300 + self.y2  # 튜플
+        if play_mode.boy.x < 2380:
+            return 0 - self.window_left, 0 - self.window_bottom, 2380 - self.window_left , 2730 - self.window_bottom
+        elif play_mode.boy.x < 4760:
+            return 2380 - self.window_left, 0 - self.window_bottom, 4760 - self.window_left , 2380 - self.window_bottom
+        elif play_mode.boy.x < 7134:
+            return 4760 - self.window_left, 0 - self.window_bottom, 7134 - self.window_left , 2060 - self.window_bottom
+        elif play_mode.boy.x < 9514:
+            return 7134 - self.window_left, 0 - self.window_bottom, 9514 - self.window_left , 1715 - self.window_bottom
+        elif play_mode.boy.x < 11471:
+            return 9514 - self.window_left, 0 - self.window_bottom, 11471 - self.window_left , 1369 - self.window_bottom
+        elif play_mode.boy.x < 13452:
+            return 11471 - self.window_left, 0 - self.window_bottom, 13452 - self.window_left , 1012 - self.window_bottom
+        elif play_mode.boy.x < 15004:
+            return 13452 - self.window_left, 0 - self.window_bottom, 15004 - self.window_left , 649 - self.window_bottom
+        
 
     def handle_collision(self, group, other):
         if group == 'boy:back_ground':

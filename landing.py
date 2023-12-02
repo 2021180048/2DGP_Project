@@ -1,12 +1,11 @@
 from header import *
 import game_framework
+import play_mode
 
 
 class Landing:
     def __init__(self):
-        self.x = 800
-        self.y = 300
-        self.x1, self.y1, self.x2, self.y2 = 800, 300, 800, -100
+        self.y = 40
 
     def handle_event(self, event):
         pass
@@ -19,7 +18,21 @@ class Landing:
         pass
 
     def get_bb(self):
-        return 800 - self.x1, 300 - self.y1, 800 + self.x2, 300 + self.y2  # 튜플
+
+        if play_mode.boy.x < 2380:
+            return 0 - play_mode.back_ground.window_left, 0 - play_mode.back_ground.window_bottom, 2380 - play_mode.back_ground.window_left , 2730 - play_mode.back_ground.window_bottom + self.y
+        elif play_mode.boy.x < 4760:
+            return 2380 - play_mode.back_ground.window_left, 0 - play_mode.back_ground.window_bottom, 4760 - play_mode.back_ground.window_left , 2380 - play_mode.back_ground.window_bottom + self.y
+        elif play_mode.boy.x < 7134:
+            return 4760 - play_mode.back_ground.window_left, 0 - play_mode.back_ground.window_bottom, 7134 - play_mode.back_ground.window_left , 2060 - play_mode.back_ground.window_bottom + self.y
+        elif play_mode.boy.x < 9514:
+            return 7134 - play_mode.back_ground.window_left, 0 - play_mode.back_ground.window_bottom, 9514 - play_mode.back_ground.window_left , 1715 - play_mode.back_ground.window_bottom + self.y
+        elif play_mode.boy.x < 11471:
+            return 9514 - play_mode.back_ground.window_left, 0 - play_mode.back_ground.window_bottom, 11471 - play_mode.back_ground.window_left , 1369 - play_mode.back_ground.window_bottom + self.y
+        elif play_mode.boy.x < 13452:
+            return 11471 - play_mode.back_ground.window_left, 0 - play_mode.back_ground.window_bottom, 13452 - play_mode.back_ground.window_left , 1012 - play_mode.back_ground.window_bottom + self.y
+        elif play_mode.boy.x < 15004:
+            return 13452 - play_mode.back_ground.window_left, 0 - play_mode.back_ground.window_bottom, 15004 - play_mode.back_ground.window_left , 649 - play_mode.back_ground.window_bottom + self.y
 
     def handle_collision(self, group, other):
         if group == 'boy:landing':
