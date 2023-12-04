@@ -202,6 +202,10 @@ class Run:
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 12
         boy.left = int(boy.frame)*80 + 80
         boy.bottom = 700
+
+        if boy.back_ground_collision == 0:
+            boy.state_machine.handle_event(("FALLING",0))
+
         if get_time() - boy.wait_time > 2.0:
             boy.state_machine.handle_event(('TIME_OUT', 0))
         pass
@@ -229,6 +233,9 @@ class Ride:
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
         
+        if boy.back_ground_collision == 0:
+            boy.state_machine.handle_event(("FALLING",0))
+
         if int(boy.frame) == 12:
             boy.state_machine.handle_event(('FRAME_OUT', 0))
             pass
@@ -382,6 +389,9 @@ class Bad_Finish:
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
 
+        if boy.back_ground_collision == 0:
+            boy.state_machine.handle_event(("FALLING",0))
+
         if get_time() - boy.wait_time > 0.6:
             boy.state_machine.handle_event(('TIME_OUT', 0))
 
@@ -425,6 +435,9 @@ class Good_Finish:
 
         # if get_time() - boy.wait_time > 0.35:
         #     boy.state_machine.handle_event(('TIME_OUT', 0))
+
+        if boy.back_ground_collision == 0:
+            boy.state_machine.handle_event(("FALLING",0))
 
         if int(boy.frame) < 4:
             boy.left = int(boy.frame) * 93 + (93 * 13)
@@ -582,6 +595,9 @@ class Lie:
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
 
+        if boy.back_ground_collision == 0:
+            boy.state_machine.handle_event(("FALLING",0))
+
         if int(boy.frame) < 7:
             boy.left = int(boy.frame) * 197
             boy.bottom = 77 * 8 + 2
@@ -737,29 +753,60 @@ class Rotation:
         boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 70, boy.radian, '', sx, sy, 110, 110)
         pass
 
+class In_Goal:
+
+    @staticmethod
+    def enter(boy, e):
+        boy.frame = 0
+        pass
+
+    @staticmethod
+    def exit(boy, e):
+        pass
+
+    @staticmethod
+    def do(boy):
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 25
+
+        if boy.back_ground_collision == 0:
+            boy.state_machine.handle_event(("FALLING",0))
+
+        if int(boy.frame) < 25:
+            boy.left = int(boy.frame) * 71 - 10
+            boy.bottom = 0
+        pass
+
+    @staticmethod
+    def draw(boy):
+        sx = boy.x - play_mode.back_ground.window_left
+        sy = boy.y - play_mode.back_ground.window_bottom
+        boy.image_new.clip_draw(boy.left, boy.bottom, 60, 70, sx, sy, 100, 100)
+        pass
+
 class StateMachine:
     def __init__(self, boy):
         self.boy = boy
-        self.cur_state = Start
+        self.cur_state = In_Goal
         self.transitions = {
             Start: {meter_out: Run},
-            Ride: {frame_out: Idle},
+            Ride: {frame_out: Idle, falling: Falling},
             Idle: {right_down: UpSpeed, space_down: Jump, falling: Falling, down_down: Lie},
             UpSpeed: {frame_out: Idle, right_up: Idle},
-            Run: {time_out: Ride},
+            Run: {time_out: Ride, falling: Falling},
             Jump: {falling: Falling, d_down: Hard_Flip, a_down: Flip, s_down: Backside_180, left_down: Rotation},
             Falling: {down_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish, fall_out: Fall_OUT},
             Railing: {down_up: Falling, space_down: Jump, bad_finish: Bad_Finish},
-            Bad_Finish: {time_out: Idle},
-            Good_Finish: {frame_out: Idle},
+            Bad_Finish: {time_out: Idle, falling: Falling},
+            Good_Finish: {frame_out: Idle, falling: Falling},
             Hard_Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing},
             Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing},
             Backside_180: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing},
-            Lie: {down_up: Lie_Up},
+            Lie: {down_up: Lie_Up, falling: Falling},
             Lie_Up: {frame_out: Idle},
             Fall_OUT: {time_out: Wake_Up},
             Wake_Up: {time_out: Run},
-            Rotation: {good_finish: Good_Finish, bad_finish: Fall_OUT, left_up: Falling, fall_out: Fall_OUT}
+            Rotation: {good_finish: Good_Finish, bad_finish: Fall_OUT, left_up: Falling, fall_out: Fall_OUT},
+            In_Goal: {},
         }
 
     def start(self):
@@ -803,6 +850,7 @@ class Boy:
         self.degree = 0
         self.speed = 0
         self.image = load_image('skater_sprite_sheet.png')
+        self.image_new = load_image('skater_in_goal.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
 
