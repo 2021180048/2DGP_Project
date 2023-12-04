@@ -1,4 +1,4 @@
-from header import*
+from header import *
 import game_framework
 import play_mode
 

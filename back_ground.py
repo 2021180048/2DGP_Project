@@ -219,7 +219,7 @@ class Goal:
         pass
 
     def get_bb(self):
-        return self.sx - 60, self.sy -100, self.sx + 60, self.sy + 100 
+        return self.sx - 60, self.sy -1000, self.sx + 60, self.sy + 100 
         pass
 
     def handle_collision(self, group, other):

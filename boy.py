@@ -760,7 +760,13 @@ class In_Goal:
 
     @staticmethod
     def enter(boy, e):
+        global image
+        global font
+
         boy.frame = 0
+        
+        image = load_image('result.png')
+        font = load_font('ENCR10B.TTF', 70)        
         pass
 
     @staticmethod
@@ -784,6 +790,9 @@ class In_Goal:
         sx = boy.x - play_mode.back_ground.window_left
         sy = boy.y - play_mode.back_ground.window_bottom
         boy.image_new.clip_draw(boy.left, boy.bottom, 70, 70, sx, sy, 100, 100)
+        image.draw(800, 300)
+        font.draw(770, 290, f'{play_mode.back_ground.score:02d}', (0, 0, 0))
+        
         pass
 
 class StateMachine:
@@ -832,8 +841,8 @@ class StateMachine:
 
 class Boy:
     def __init__(self):
-        # self.x, self.y = 150, 2770 # 시작위치
-        self.x, self.y = 14500, 700
+        self.x, self.y = 150, 2770 # 시작위치
+        # self.x, self.y = 14500, 700
 
         self.x1, self.y1, self.x2, self.y2 = 25, 50, 30, -40
         self.frame = 0

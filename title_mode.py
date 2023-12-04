@@ -4,7 +4,14 @@ import play_mode
 
 def init():
     global image
+    global image_2
+    global image_3
+    global image_4
+
     image = load_image('Title_Screen.png')
+    image_2 = load_image('city_0.png')
+    image_3 = load_image('city_1.png')
+    image_4 = load_image('city_2.png')
     pass
 
 
@@ -18,6 +25,9 @@ def update():
 
 def draw():
     clear_canvas()
+    image_2.draw(800, 300)
+    image_3.draw(800, 300)
+    image_4.draw(800, 300)
     image.draw(800, 300, 600, 600)
     update_canvas()
     pass
