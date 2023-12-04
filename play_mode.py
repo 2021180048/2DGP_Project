@@ -11,12 +11,10 @@ import title_mode
 def init():
     global boy
     global back_ground
-    global rail
     global landing
-    running = True
 
     boy = Boy()
-    game_world.add_object(boy, 2)    
+    game_world.add_object(boy, 2)
 
     back_ground = Back_ground()
     game_world.add_object(back_ground, 1)
@@ -81,7 +79,9 @@ def handle_events():
     for event in events:
         if event.type == SDL_QUIT:
             game_framework.quit()
-        elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
+        elif event.type == SDL_KEYDOWN and (event.key == SDLK_ESCAPE):
+            close_canvas()
+            open_canvas(1600,600)
             game_framework.change_mode(title_mode)
         else:
             boy.handle_event(event)

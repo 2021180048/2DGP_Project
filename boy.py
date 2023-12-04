@@ -46,6 +46,9 @@ def down_up(e):
 def space_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE
 
+def space_down_with_railing(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_SPACE and (play_mode.boy.rail_collision == 1 or play_mode.boy.stone_rail_collision == 1 or play_mode.boy.round_rail_collision == 1)
+
 def space_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_SPACE
 
@@ -140,8 +143,11 @@ class UpSpeed:
         boy.left = int(boy.frame) * 81 + 80
         boy.bottom = 75 * 5
 
+        if boy.back_ground_collision == 0:
+            boy.state_machine.handle_event(("FALLING",0))
+
         if get_time() - boy.wait_time > 0.7 and boy.speed < 5:
-            boy.speed += 2
+            boy.speed += 1
             boy.wait_time += (get_time() - boy.wait_time)
            
         if boy.speed > 5:
@@ -350,8 +356,8 @@ class Railing:
     def enter(boy, e):
         boy.idle_sound.resume()
         boy.frame = 0
-        boy.rail_collision = 0
-        boy.back_ground_collision = 0
+        # boy.rail_collision = 0
+        # boy.back_ground_collision = 0
         play_mode.back_ground.score += 10
         pass
 
@@ -667,6 +673,7 @@ class Fall_OUT:
         boy.idle_sound.pause()
         boy.speed = 0
         boy.frame = 0
+        boy.degree = 0
         boy.wait_time = get_time()
         play_mode.back_ground.buffer = 0
         if(play_mode.back_ground.score >= 50):
@@ -825,11 +832,11 @@ class StateMachine:
             Start: {meter_out: Run},
             Ride: {frame_out: Idle, falling: Falling},
             Idle: {right_down: UpSpeed, space_down: Jump, falling: Falling, down_down: Lie, in_goal: In_Goal},
-            UpSpeed: {frame_out: Idle, right_up: Idle},
+            UpSpeed: {frame_out: Idle, right_up: Idle, space_down: Jump, falling: Falling},
             Run: {time_out: Ride, falling: Falling},
             Jump: {falling: Falling, d_down: Hard_Flip, a_down: Flip, s_down: Backside_180, left_down: Rotation, in_goal: In_Goal},
             Falling: {down_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish, fall_out: Fall_OUT, in_goal: In_Goal},
-            Railing: {down_up: Falling, space_down: Jump, bad_finish: Bad_Finish},
+            Railing: {down_up: Falling, space_down_with_railing: Jump, bad_finish: Bad_Finish},
             Bad_Finish: {time_out: Idle, falling: Falling, in_goal: In_Goal},
             Good_Finish: {frame_out: Idle, falling: Falling, in_goal: In_Goal},
             Hard_Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing, in_goal: In_Goal},
@@ -863,8 +870,8 @@ class StateMachine:
 
 class Boy:
     def __init__(self):
-        # self.x, self.y = 150, 2770 # 시작위치
-        self.x, self.y = 14500, 700
+        self.x, self.y = 150, 2770 # 시작위치
+        # self.x, self.y = 14500, 700
 
         self.x1, self.y1, self.x2, self.y2 = 25, 50, 30, -40
         self.frame = 0
@@ -895,7 +902,7 @@ class Boy:
         self.land_sound = load_wav('land.wav')
         self.land_sound.set_volume(32)        
         self.fall_out_sound = load_wav('fall_out.wav')
-        self.fall_out_sound.set_volume(32)        
+        self.fall_out_sound.set_volume(32)
 
     def update(self):
         self.sx, self.sy = self.x - play_mode.back_ground.window_left, self.y - play_mode.back_ground.window_bottom          
