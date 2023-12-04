@@ -97,6 +97,9 @@ class Start:
         boy.frame = 0
         boy.speed = 1
         boy.wait_time = get_time()
+        boy.walk_sound = load_wav('walk.wav')
+        boy.walk_sound.set_volume(32)        
+        boy.walk_sound.play()
         pass
 
     @staticmethod
@@ -158,6 +161,7 @@ class Idle:
     def enter(boy, e):
         boy.frame = 0
         boy.radian = 0
+        boy.idle_sound.repeat_play()
         pass
 
     @staticmethod
@@ -191,9 +195,12 @@ class Run:
 
     @staticmethod
     def enter(boy, e):
+        boy.run_sound = load_wav('run.wav')
+        boy.run_sound.set_volume(32)
         boy.frame = 0
         boy.speed = 1
         boy.wait_time = get_time()
+        boy.run_sound.play(2)
         pass
 
     @staticmethod
@@ -226,6 +233,7 @@ class Ride:
         boy.frame = 0
         boy.left = 0
         boy.bottom = 0
+        boy.ride_sound.play()
         pass
 
     @staticmethod
@@ -261,6 +269,11 @@ class Jump:
 
     @staticmethod
     def enter(boy, e):
+        boy.jump_sound = load_wav('jump.wav')
+        boy.jump_sound.set_volume(32)
+        boy.jump_sound.play()
+        boy.idle_sound.pause()
+
         boy.frame = 0
         boy.back_ground_collision = 0
         boy.rail_collision = 0
@@ -302,6 +315,7 @@ class Jump:
 class Falling:
     @staticmethod
     def enter(boy, e):
+        boy.idle_sound.pause()
         boy.frame = 0
         boy.wait_time = get_time()
         boy.land = 0
@@ -334,6 +348,7 @@ class Falling:
 class Railing:
     @staticmethod
     def enter(boy, e):
+        boy.idle_sound.resume()
         boy.frame = 0
         boy.rail_collision = 0
         boy.back_ground_collision = 0
@@ -369,6 +384,7 @@ class Railing:
 class Bad_Finish:
     @staticmethod
     def enter(boy, e):
+        boy.land_sound.play()
         boy.frame = 0
         # boy.rail_collision = 0
         # boy.back_ground_collision = 0
@@ -419,6 +435,7 @@ class Good_Finish:
     @staticmethod
     def enter(boy, e):
         boy.frame = 0
+        boy.land_sound.play()
         # boy.rail_collision = 0
         # boy.back_ground_collision = 0
         boy.wait_time = get_time()
@@ -646,6 +663,8 @@ class Fall_OUT:
 
     @staticmethod
     def enter(boy, e):
+        boy.fall_out_sound.play()
+        boy.idle_sound.pause()
         boy.speed = 0
         boy.frame = 0
         boy.wait_time = get_time()
@@ -762,7 +781,10 @@ class In_Goal:
     def enter(boy, e):
         global image
         global font
-
+        boy.goal_reached_sound = load_wav('goal_reached.wav')
+        boy.goal_reached_sound.set_volume(50)
+        boy.goal_reached_sound.play()
+        boy.idle_sound.stop()
         boy.frame = 0
         
         image = load_image('result.png')
@@ -791,14 +813,14 @@ class In_Goal:
         sy = boy.y - play_mode.back_ground.window_bottom
         boy.image_new.clip_draw(boy.left, boy.bottom, 70, 70, sx, sy, 100, 100)
         image.draw(800, 300)
-        font.draw(770, 290, f'{play_mode.back_ground.score:02d}', (0, 0, 0))
+        font.draw(760, 300, f'{play_mode.back_ground.score:02d}', (0, 0, 255))
         
         pass
 
 class StateMachine:
     def __init__(self, boy):
         self.boy = boy
-        self.cur_state = Idle
+        self.cur_state = Start
         self.transitions = {
             Start: {meter_out: Run},
             Ride: {frame_out: Idle, falling: Falling},
@@ -841,8 +863,8 @@ class StateMachine:
 
 class Boy:
     def __init__(self):
-        self.x, self.y = 150, 2770 # 시작위치
-        # self.x, self.y = 14500, 700
+        # self.x, self.y = 150, 2770 # 시작위치
+        self.x, self.y = 14500, 700
 
         self.x1, self.y1, self.x2, self.y2 = 25, 50, 30, -40
         self.frame = 0
@@ -860,11 +882,20 @@ class Boy:
         self.land = 0
         self.seed_y = 0
         self.degree = 0
+        self.radian = 0
         self.speed = 0
         self.image = load_image('skater_sprite_sheet.png')
         self.image_new = load_image('skater_in_goal.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
+        self.ride_sound = load_wav('land.wav')
+        self.ride_sound.set_volume(32)
+        self.idle_sound = load_music('idle.wav')
+        self.idle_sound.set_volume(50)
+        self.land_sound = load_wav('land.wav')
+        self.land_sound.set_volume(32)        
+        self.fall_out_sound = load_wav('fall_out.wav')
+        self.fall_out_sound.set_volume(32)        
 
     def update(self):
         self.sx, self.sy = self.x - play_mode.back_ground.window_left, self.y - play_mode.back_ground.window_bottom          
