@@ -31,8 +31,8 @@ class Landing:
             return 9514 - play_mode.back_ground.window_left, 0 - play_mode.back_ground.window_bottom, 11471 - play_mode.back_ground.window_left , 1369 - play_mode.back_ground.window_bottom + self.y
         elif play_mode.boy.x < 13452:
             return 11471 - play_mode.back_ground.window_left, 0 - play_mode.back_ground.window_bottom, 13452 - play_mode.back_ground.window_left , 1012 - play_mode.back_ground.window_bottom + self.y
-        elif play_mode.boy.x < 15004:
-            return 13452 - play_mode.back_ground.window_left, 0 - play_mode.back_ground.window_bottom, 15004 - play_mode.back_ground.window_left , 649 - play_mode.back_ground.window_bottom + self.y
+        elif play_mode.boy.x < 16300:
+            return 13452 - play_mode.back_ground.window_left, 0 - play_mode.back_ground.window_bottom, 16300 - play_mode.back_ground.window_left , 649 - play_mode.back_ground.window_bottom + self.y
 
     def handle_collision(self, group, other):
         if group == 'boy:landing':

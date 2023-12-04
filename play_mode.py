@@ -46,11 +46,16 @@ def init():
     game_world.add_object(rail_0, 1)
 
     stone_rail_0 = Stone_Rail_0()
-    game_world.add_object(stone_rail_0)
+    game_world.add_object(stone_rail_0, 1)
+
+    round_rail_0 = Round_Rail_0()
+    game_world.add_object(round_rail_0, 1)
 
     game_world.add_collision_pair('boy:rail', boy, rail_0)
     
     game_world.add_collision_pair('boy:stone_rail', boy, stone_rail_0)
+
+    game_world.add_collision_pair('boy:round_rail', boy, round_rail_0)
 
     game_world.add_collision_pair('boy:back_ground', boy, back_ground)
 

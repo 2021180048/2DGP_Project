@@ -40,8 +40,8 @@ class Back_ground:
     def draw(self):
         self.image.clip_draw_to_origin(self.window_left, self.window_bottom, self.cw, self.ch, 0, 0)
         # self.image.draw(self.x + 1600, self.y, 1600, 600)
-        self.font.draw(100, 550, f'speed = {play_mode.boy.speed:02d}', (0, 0, 0))
-        self.font.draw(100, 500, f'score = {self.score:02d}', (0, 0, 0))
+        self.font.draw(100, 550, f'speed = {play_mode.boy.speed:02d}', (255, 255, 255))
+        self.font.draw(100, 500, f'score = {self.score:02d}', (255, 255, 255))
         draw_rectangle(*self.get_bb())
         pass
 
@@ -58,8 +58,8 @@ class Back_ground:
             return 9514 - self.window_left, 0 - self.window_bottom, 11471 - self.window_left , 1369 - self.window_bottom
         elif play_mode.boy.x < 13452:
             return 11471 - self.window_left, 0 - self.window_bottom, 13452 - self.window_left , 1012 - self.window_bottom
-        elif play_mode.boy.x < 15004:
-            return 13452 - self.window_left, 0 - self.window_bottom, 15004 - self.window_left , 649 - self.window_bottom
+        elif play_mode.boy.x < 16300:
+            return 13452 - self.window_left, 0 - self.window_bottom, 16300 - self.window_left , 649 - self.window_bottom
         
 
     def handle_collision(self, group, other):
@@ -202,7 +202,7 @@ class Goal:
         if Moon.image == None:
             self.image = load_image('goal.png')
 
-        self.x = 14800
+        self.x = 16100
         self.y = 750
             
     def handle_event(self, event):
