@@ -88,6 +88,9 @@ def good_finish(e):
 def fall_out(e):
     return e[0] == 'FALL_OUT'
 
+def in_goal(e):
+    return e[0] == 'IN_GOAL'
+
 class Start:
     @staticmethod
     def enter(boy, e):
@@ -766,13 +769,13 @@ class In_Goal:
 
     @staticmethod
     def do(boy):
-        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 25
+        boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time * 1.5) % 25
 
         if boy.back_ground_collision == 0:
             boy.state_machine.handle_event(("FALLING",0))
 
         if int(boy.frame) < 25:
-            boy.left = int(boy.frame) * 71 - 10
+            boy.left = int(boy.frame) * 71 - 13
             boy.bottom = 0
         pass
 
@@ -780,32 +783,32 @@ class In_Goal:
     def draw(boy):
         sx = boy.x - play_mode.back_ground.window_left
         sy = boy.y - play_mode.back_ground.window_bottom
-        boy.image_new.clip_draw(boy.left, boy.bottom, 60, 70, sx, sy, 100, 100)
+        boy.image_new.clip_draw(boy.left, boy.bottom, 70, 70, sx, sy, 100, 100)
         pass
 
 class StateMachine:
     def __init__(self, boy):
         self.boy = boy
-        self.cur_state = In_Goal
+        self.cur_state = Idle
         self.transitions = {
             Start: {meter_out: Run},
             Ride: {frame_out: Idle, falling: Falling},
-            Idle: {right_down: UpSpeed, space_down: Jump, falling: Falling, down_down: Lie},
+            Idle: {right_down: UpSpeed, space_down: Jump, falling: Falling, down_down: Lie, in_goal: In_Goal},
             UpSpeed: {frame_out: Idle, right_up: Idle},
             Run: {time_out: Ride, falling: Falling},
-            Jump: {falling: Falling, d_down: Hard_Flip, a_down: Flip, s_down: Backside_180, left_down: Rotation},
-            Falling: {down_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish, fall_out: Fall_OUT},
+            Jump: {falling: Falling, d_down: Hard_Flip, a_down: Flip, s_down: Backside_180, left_down: Rotation, in_goal: In_Goal},
+            Falling: {down_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish, fall_out: Fall_OUT, in_goal: In_Goal},
             Railing: {down_up: Falling, space_down: Jump, bad_finish: Bad_Finish},
-            Bad_Finish: {time_out: Idle, falling: Falling},
-            Good_Finish: {frame_out: Idle, falling: Falling},
-            Hard_Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing},
-            Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing},
-            Backside_180: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing},
-            Lie: {down_up: Lie_Up, falling: Falling},
-            Lie_Up: {frame_out: Idle},
+            Bad_Finish: {time_out: Idle, falling: Falling, in_goal: In_Goal},
+            Good_Finish: {frame_out: Idle, falling: Falling, in_goal: In_Goal},
+            Hard_Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing, in_goal: In_Goal},
+            Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing, in_goal: In_Goal},
+            Backside_180: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing, in_goal: In_Goal},
+            Lie: {down_up: Lie_Up, falling: Falling, in_goal: In_Goal},
+            Lie_Up: {frame_out: Idle, in_goal: In_Goal},
             Fall_OUT: {time_out: Wake_Up},
             Wake_Up: {time_out: Run},
-            Rotation: {good_finish: Good_Finish, bad_finish: Fall_OUT, left_up: Falling, fall_out: Fall_OUT},
+            Rotation: {good_finish: Good_Finish, bad_finish: Fall_OUT, left_up: Falling, fall_out: Fall_OUT, in_goal: In_Goal},
             In_Goal: {},
         }
 
@@ -829,8 +832,8 @@ class StateMachine:
 
 class Boy:
     def __init__(self):
-        self.x, self.y = 150, 2770 # 시작위치
-        # self.x, self.y = 14500, 700
+        # self.x, self.y = 150, 2770 # 시작위치
+        self.x, self.y = 14500, 700
 
         self.x1, self.y1, self.x2, self.y2 = 25, 50, 30, -40
         self.frame = 0
@@ -896,6 +899,7 @@ class Boy:
 
         if group == 'boy:goal':
             self.speed = 0
+            self.state_machine.handle_event(('IN_GOAL', 0))
             pass
 
     def handle_not_collision(self, group, other):
