@@ -134,12 +134,12 @@ class UpSpeed:
         boy.left = int(boy.frame) * 81 + 80
         boy.bottom = 75 * 5
 
-        if get_time() - boy.wait_time > 0.7 and boy.speed < 10:
+        if get_time() - boy.wait_time > 0.7 and boy.speed < 5:
             boy.speed += 2
             boy.wait_time += (get_time() - boy.wait_time)
            
-        if boy.speed > 10:
-            boy.speed = 10
+        if boy.speed > 5:
+            boy.speed = 5
 
 
     @staticmethod
@@ -155,8 +155,6 @@ class Idle:
     def enter(boy, e):
         boy.frame = 0
         boy.radian = 0
-        boy.rail_collision = 1
-        boy.back_ground_collision = 1
         pass
 
     @staticmethod
@@ -165,8 +163,10 @@ class Idle:
 
     @staticmethod
     def do(boy):
-        if boy.back_ground_collision != 1 and boy.rail_collision != 1:
+
+        if boy.back_ground_collision != 1 and boy.rail_collision != 1 and boy.stone_rail_collision != 1:
             boy.state_machine.handle_event(('FALLING', 0))
+        
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time) % 4
         boy.left = 0
         boy.bottom = 78 * 9
@@ -255,6 +255,7 @@ class Jump:
         boy.back_ground_collision = 0
         boy.rail_collision = 0
         boy.landing_collision = 0
+        boy.stone_rail_collision = 0
         boy.seed_y = boy.y
         boy.ok = True
         pass
@@ -277,6 +278,7 @@ class Jump:
             boy.y += JUMP_SPEED_PPS * game_framework.frame_time
             boy.rail_collision = 0
             boy.landing_collision = 0
+            boy.stone_rail_collision = 0
             boy.back_ground_collision = 0 #스페이스바 씺힘 때문
             pass
 
@@ -324,7 +326,6 @@ class Railing:
         boy.frame = 0
         boy.rail_collision = 0
         boy.back_ground_collision = 0
-        boy.radian = 0
         play_mode.back_ground.score += 10
         pass
 
@@ -336,14 +337,8 @@ class Railing:
     def do(boy):
         boy.frame = (boy.frame + FRAMES_PER_TIME * game_framework.frame_time)
 
-        if boy.rail_collision == 0 and boy.back_ground_collision == 0:
+        if boy.rail_collision == 0 and boy.back_ground_collision == 0 and boy.stone_rail_collision == 0:
             boy.gravity()
-
-        if boy.rail_collision == 1:
-            if int(boy.frame) % 2 == 0:
-                boy.radian = 3.141592/180 * 1
-            else:
-                boy.radian = 3.141592/180 * 0
 
         if boy.back_ground_collision == 1:
             boy.state_machine.handle_event(('BAD_FINISH', 0))
@@ -357,16 +352,15 @@ class Railing:
     def draw(boy):
         sx = boy.x - play_mode.back_ground.window_left
         sy = boy.y - play_mode.back_ground.window_bottom
-        boy.image.clip_composite_draw(boy.left, boy.bottom, 80, 80, boy.radian, '', sx, sy, 120, 120)
+        boy.image.clip_draw(boy.left, boy.bottom, 80, 80, sx, sy, 120, 120)
         pass
 
 class Bad_Finish:
     @staticmethod
     def enter(boy, e):
-        boy.degree = 0
         boy.frame = 0
-        boy.rail_collision = 0
-        boy.back_ground_collision = 0
+        # boy.rail_collision = 0
+        # boy.back_ground_collision = 0
         boy.wait_time = get_time()
         play_mode.back_ground.buffer = 0
         if(boy.speed > 1):
@@ -410,13 +404,12 @@ class Good_Finish:
 
     @staticmethod
     def enter(boy, e):
-        boy.degree = 0
         boy.frame = 0
-        boy.rail_collision = 0
-        boy.back_ground_collision = 0
-        boy.radian = 0
+        # boy.rail_collision = 0
+        # boy.back_ground_collision = 0
         boy.wait_time = get_time()
-        play_mode.back_ground.score += play_mode.back_ground.buffer
+        if boy.speed >= 3:
+            play_mode.back_ground.score += play_mode.back_ground.buffer
         play_mode.back_ground.buffer = 0
         pass
 
@@ -466,7 +459,8 @@ class Hard_Flip:
         if int(boy.frame) < 10:
             boy.left = int(boy.frame) * 100 + (100 * 3)
             boy.bottom = 0
-        pass
+
+        boy.dicide_landing()
 
         if boy.flag == True:
             boy.gravity()
@@ -475,8 +469,6 @@ class Hard_Flip:
 
         if boy.y-boy.seed_y >= 150:
             boy.flag = True
-
-        boy.dicide_landing()
 
     @staticmethod
     def draw(boy):
@@ -751,14 +743,14 @@ class StateMachine:
             Idle: {right_down: UpSpeed, space_down: Jump, falling: Falling, down_down: Lie},
             UpSpeed: {frame_out: Idle, right_up: Idle},
             Run: {time_out: Ride},
-            Jump: {meter_out: Idle, falling: Falling, d_down: Hard_Flip, a_down: Flip, s_down: Backside_180, left_down: Rotation},
-            Falling: {meter_out: Idle, down_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish, fall_out: Fall_OUT},
+            Jump: {falling: Falling, d_down: Hard_Flip, a_down: Flip, s_down: Backside_180, left_down: Rotation},
+            Falling: {down_down: Railing, bad_finish: Bad_Finish, good_finish: Good_Finish, fall_out: Fall_OUT},
             Railing: {down_up: Falling, space_down: Jump, bad_finish: Bad_Finish},
             Bad_Finish: {time_out: Idle},
             Good_Finish: {time_out: Idle},
-            Hard_Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish},
-            Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish},
-            Backside_180: {good_finish: Good_Finish, bad_finish: Bad_Finish},
+            Hard_Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing},
+            Flip: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing},
+            Backside_180: {good_finish: Good_Finish, bad_finish: Bad_Finish, down_down: Railing},
             Lie: {down_up: Lie_Up},
             Lie_Up: {frame_out: Idle},
             Fall_OUT: {time_out: Wake_Up},
@@ -786,14 +778,18 @@ class StateMachine:
 
 class Boy:
     def __init__(self):
-        self.x, self.y = 150, 2770
+        self.x, self.y = 150, 2770 # 시작위치
+        # self.x, self.y = 3500, 2400
+
         self.x1, self.y1, self.x2, self.y2 = 25, 50, 30, -40
         self.frame = 0
         self.left = 0
         self.bottom = 0
         self.dir = 0
-        self.back_ground_collision = 0
+        self.back_ground_collision = 1
         self.landing_collision = 0
+        self.rail_collision = 0
+        self.stone_rail_collision = 0
         self.down_speed = 0
         self.event = None
         self.ok = False
@@ -829,6 +825,10 @@ class Boy:
             self.rail_collision = 1
             pass
 
+        if group == 'boy:stone_rail':
+            self.stone_rail_collision = 1
+            pass
+
         if group == 'boy:back_ground':
             self.back_ground_collision = 1
             pass
@@ -837,9 +837,17 @@ class Boy:
             self.landing_collision = 1
             pass
 
+        if group == 'boy:goal':
+            self.speed = 0
+            pass
+
     def handle_not_collision(self, group, other):
         if group == 'boy:rail':
             self.rail_collision = 0
+            pass
+ 
+        if group == 'boy:stone_rail':
+            self.stone_rail_collision = 0
             pass
 
         if group == 'boy:back_ground':

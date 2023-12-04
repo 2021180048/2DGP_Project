@@ -12,10 +12,8 @@ class Back_ground:
     
     image = None
     
-    
     def __init__(self):
         if Back_ground.image == None:
-            #self.image = load_image('back_ground.jpg')
             self.image = load_image('back_ground_new.png')
 
         self.x = 0
@@ -29,13 +27,15 @@ class Back_ground:
         self.w = self.image.w # 배경의 너비
         self.h = self.image.h # 배경의 높이
         self.font = load_font('ENCR10B.TTF', 30)
+        self.window_left = 0
+        self.window_bottom = 0
     
     def handle_event(self, event):
         pass
 
     def update(self):
-        self.window_left = clamp(0, int(play_mode.boy.x) - 300, self.w - self.cw)
-        self.window_bottom = clamp(0, int(play_mode.boy.y) - self.ch // 2, self.h - self.ch)
+        self.window_left = clamp(0, int(play_mode.boy.x) - 300, self.w - self.cw - 1)
+        self.window_bottom = clamp(0, int(play_mode.boy.y) - self.ch // 2, self.h - self.ch - 1)
 
     def draw(self):
         self.image.clip_draw_to_origin(self.window_left, self.window_bottom, self.cw, self.ch, 0, 0)
@@ -76,3 +76,163 @@ class Back_ground:
 
         if group == 'back_ground:rail':
             pass
+
+class City_0:
+
+    image = None
+
+    def __init__(self):
+        if City_0.image == None:
+            self.image = load_image('city_0.png')
+
+        self.x = get_canvas_width() // 2
+        self.y = get_canvas_height() // 2
+            
+    def handle_event(self, event):
+        pass
+
+    def update(self):
+        pass
+
+    def draw(self):
+        self.image.draw(self.x, self.y)
+        pass
+
+class City_1:
+
+    image = None
+
+    def __init__(self):
+        if City_1.image == None:
+            self.image = load_image('city_1.png')
+
+        self.x = get_canvas_width() // 2
+        self.y = get_canvas_height() // 2
+            
+    def handle_event(self, event):
+        pass
+
+    def update(self):
+        if 0 < play_mode.back_ground.window_left < play_mode.back_ground.w - play_mode.back_ground.cw - 1:
+            self.x -= MAP_SPEED_PPS * game_framework.frame_time * play_mode.boy.speed * 1.3
+        if self.x <= -800:
+            self.x = get_canvas_width() // 2
+
+        pass
+
+    def draw(self):
+        self.image.draw(self.x, self.y)
+        self.image.draw(self.x + 1600, self.y)
+        pass
+
+class City_2:
+
+    image = None
+
+    def __init__(self):
+        if City_2.image == None:
+            self.image = load_image('city_2.png')
+
+        self.x = get_canvas_width() // 2
+        self.y = get_canvas_height() // 2
+            
+    def handle_event(self, event):
+        pass
+
+    def update(self):
+        if 0 < play_mode.back_ground.window_left < play_mode.back_ground.w - play_mode.back_ground.cw - 1:
+            self.x -= MAP_SPEED_PPS * game_framework.frame_time * play_mode.boy.speed * 1.1
+        if self.x <= -800:
+            self.x = get_canvas_width() // 2
+
+        pass
+
+    def draw(self):
+        self.image.draw(self.x, self.y)
+        self.image.draw(self.x + 1600, self.y)
+        pass
+
+class Star:
+
+    image = None
+
+    def __init__(self):
+        if Star.image == None:
+            self.image = load_image('star.png')
+
+        self.x = get_canvas_width() // 2
+        self.y = get_canvas_height() // 2
+            
+    def handle_event(self, event):
+        pass
+
+    def update(self):
+        pass
+
+    def draw(self):
+        self.image.draw(self.x, self.y)
+        pass
+
+class Moon:
+
+    image = None
+
+    def __init__(self):
+        if Moon.image == None:
+            self.image = load_image('moon.png')
+
+        self.x = get_canvas_width() // 2 + 650
+        self.y = get_canvas_height() // 2 + 220
+            
+    def handle_event(self, event):
+        pass
+
+    def update(self):
+        pass
+
+    def draw(self):
+        self.image.draw(self.x, self.y)
+        pass
+
+class Goal:
+
+    image = None
+
+    def __init__(self):
+        if Moon.image == None:
+            self.image = load_image('goal.png')
+
+        self.x = 14800
+        self.y = 750
+            
+    def handle_event(self, event):
+        pass
+
+    def update(self):
+        self.sx = self.x - play_mode.back_ground.window_left
+        self.sy = self.y - play_mode.back_ground.window_bottom
+        pass
+
+    def draw(self):
+        self.image.draw(self.sx, self.sy)
+        draw_rectangle(*self.get_bb())
+        pass
+
+    def get_bb(self):
+        return self.sx - 60, self.sy -100, self.sx + 60, self.sy + 100 
+        pass
+
+    def handle_collision(self, group, other):
+        if group == 'boy:goal':
+            pass
+
+        if group == 'boy:goal':
+            pass
+
+    def handle_not_collision(self, group, other):
+        if group == 'boy:goal':
+            pass
+
+        if group == 'boy:goal':
+            pass
+

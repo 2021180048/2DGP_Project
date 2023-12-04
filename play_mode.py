@@ -1,7 +1,7 @@
 from header import *
 from boy import Boy
-from back_ground import Back_ground
-from rail import Rail
+from back_ground import *
+from rail import *
 from landing import Landing
 import game_world
 import game_framework
@@ -15,25 +15,48 @@ def init():
     global landing
     running = True
 
-    back_ground = Back_ground()
-    game_world.add_object(back_ground, 0)
-
     boy = Boy()
     game_world.add_object(boy, 2)    
+
+    back_ground = Back_ground()
+    game_world.add_object(back_ground, 1)
+
+    city_0 = City_0()
+    game_world.add_object(city_0, 0)
+
+    star = Star()
+    game_world.add_object(star, 0)
+
+    moon = Moon()
+    game_world.add_object(moon, 0)
+
+    city_1 = City_1()
+    game_world.add_object(city_1, 0)
+
+    city_2 = City_2()
+    game_world.add_object(city_2, 0)    
+
+    goal = Goal()
+    game_world.add_object(goal, 0)
 
     landing = Landing()
     game_world.add_object(landing, 0)
 
-    rail = Rail()
-    game_world.add_object(rail, 1)
+    rail_0 = Rail_0()
+    game_world.add_object(rail_0, 1)
 
-    game_world.add_collision_pair('boy:rail', boy, rail)
+    stone_rail_0 = Stone_Rail_0()
+    game_world.add_object(stone_rail_0)
+
+    game_world.add_collision_pair('boy:rail', boy, rail_0)
+    
+    game_world.add_collision_pair('boy:stone_rail', boy, stone_rail_0)
 
     game_world.add_collision_pair('boy:back_ground', boy, back_ground)
 
     game_world.add_collision_pair('boy:landing', boy, landing)
 
-    game_world.add_collision_pair('back_ground:rail', back_ground, rail)
+    game_world.add_collision_pair('boy:goal', boy, goal)
 
 def finish():
     game_world.clear()
