@@ -820,7 +820,7 @@ class In_Goal:
         sy = boy.y - play_mode.back_ground.window_bottom
         boy.image_new.clip_draw(boy.left, boy.bottom, 70, 70, sx, sy, 100, 100)
         image.draw(800, 300)
-        font.draw(760, 300, f'{play_mode.back_ground.score:02d}', (0, 0, 255))
+        font.draw(750, 300, f'{play_mode.back_ground.score:02d}', (0, 0, 255))
         
         pass
 
@@ -877,13 +877,11 @@ class Boy:
         self.frame = 0
         self.left = 0
         self.bottom = 0
-        self.dir = 0
         self.back_ground_collision = 1
         self.landing_collision = 0
         self.rail_collision = 0
         self.stone_rail_collision = 0
         self.round_rail_collision = 0
-        self.down_speed = 0
         self.event = None
         self.ok = False
         self.land = 0
@@ -895,6 +893,7 @@ class Boy:
         self.image_new = load_image('skater_in_goal.png')
         self.state_machine = StateMachine(self)
         self.state_machine.start()
+
         self.ride_sound = load_wav('land.wav')
         self.ride_sound.set_volume(32)
         self.idle_sound = load_music('idle.wav')
