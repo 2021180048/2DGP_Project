@@ -868,7 +868,7 @@ class StateMachine:
 
 class Boy:
     def __init__(self):
-        self.x, self.y = 150, 2770 # 시작위치
+        self.x, self.y = 150, 2780 # 시작위치
         # self.x, self.y = 14500, 700
 
         self.x1, self.y1, self.x2, self.y2 = 25, 55, 30, -40
