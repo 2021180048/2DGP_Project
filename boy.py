@@ -338,7 +338,7 @@ class Falling:
 
         if int(boy.frame) < 6:
             boy.left = int(boy.frame) * 81 + (81 * 13)
-            boy.bottom = 75 * 2
+            boy.bottom = 72 * 2
         pass
 
     @staticmethod
@@ -485,7 +485,6 @@ class Hard_Flip:
         boy.frame = 0
         boy.flag = False
         boy.ok = True
-        boy.land = 0
         play_mode.back_ground.buffer += 30
         pass
 
@@ -526,7 +525,6 @@ class Flip:
         boy.frame = 0
         boy.flag = False
         boy.ok = True
-        boy.land = 0
         play_mode.back_ground.buffer += 20
         pass
 
@@ -570,7 +568,6 @@ class Backside_180:
         boy.frame = 0
         boy.flag = False
         boy.ok = True
-        boy.land = 0
         play_mode.back_ground.buffer += 20
         pass
 
@@ -874,7 +871,7 @@ class Boy:
         self.x, self.y = 150, 2770 # 시작위치
         # self.x, self.y = 14500, 700
 
-        self.x1, self.y1, self.x2, self.y2 = 25, 50, 30, -40
+        self.x1, self.y1, self.x2, self.y2 = 25, 55, 30, -40
         self.frame = 0
         self.left = 0
         self.bottom = 0
