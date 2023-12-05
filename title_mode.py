@@ -1,6 +1,7 @@
 from header import*
 import game_framework
 import play_mode
+import about_mode
 
 def init():
     global image
@@ -38,5 +39,5 @@ def handle_events():
         if event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
         elif (event.type, event.key) == (SDL_KEYDOWN, SDLK_RETURN):
-            game_framework.change_mode(play_mode)
+            game_framework.change_mode(about_mode)
     pass
