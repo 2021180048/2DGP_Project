@@ -279,7 +279,6 @@ class Jump:
         boy.jump_sound.set_volume(32)
         boy.jump_sound.play()
         boy.idle_sound.pause()
-
         boy.frame = 0
         boy.back_ground_collision = 0
         boy.rail_collision = 0
@@ -287,7 +286,6 @@ class Jump:
         boy.stone_rail_collision = 0
         boy.round_rail_collision = 0
         boy.seed_y = boy.y
-        boy.ok = True
         pass
 
     @staticmethod
@@ -324,12 +322,12 @@ class Falling:
         boy.idle_sound.pause()
         boy.frame = 0
         boy.wait_time = get_time()
-        boy.land = 0
         boy.ok = True
         pass
 
     @staticmethod
     def exit(boy, e):
+        boy.ok = False
         pass
 
     @staticmethod
@@ -468,7 +466,7 @@ class Good_Finish:
         if int(boy.frame) < 4:
             boy.left = int(boy.frame) * 93 + (93 * 13)
             boy.bottom = 0
-        elif boy.frame >= 3.5:
+        elif boy.frame > 3:
             boy.state_machine.handle_event(('FRAME_OUT', 0))
 
         pass
@@ -493,6 +491,7 @@ class Hard_Flip:
 
     @staticmethod
     def exit(boy, e):
+        boy.ok = False
         pass
 
     @staticmethod
@@ -533,6 +532,7 @@ class Flip:
 
     @staticmethod
     def exit(boy, e):
+        boy.ok = False
         pass
 
     @staticmethod
@@ -576,6 +576,7 @@ class Backside_180:
 
     @staticmethod
     def exit(boy, e):
+        boy.ok = False
         pass
 
     @staticmethod
@@ -745,12 +746,12 @@ class Rotation:
         boy.degree = 0
         boy.flag = False
         boy.ok = True
-        boy.land = 0
         play_mode.back_ground.buffer += 40
         pass
 
     @staticmethod
     def exit(boy, e):
+        boy.ok = False
         pass
 
     @staticmethod
@@ -882,9 +883,8 @@ class Boy:
         self.rail_collision = 0
         self.stone_rail_collision = 0
         self.round_rail_collision = 0
-        self.event = None
         self.ok = False
-        self.land = 0
+        self.land = False
         self.seed_y = 0
         self.degree = 0
         self.radian = 0
@@ -910,13 +910,19 @@ class Boy:
         pass
 
     def handle_event(self, event):
+
+        if event.type == SDL_KEYDOWN and event.key == SDLK_SPACE and self.ok == True:
+            self.land = False
+            if self.landing_collision == 1:
+                self.land = True
+            self.ok = False
+
         self.state_machine.handle_event(('INPUT', event))
-        self.event = event
         pass
 
     def draw(self):      
         self.state_machine.draw()
-        # draw_rectangle(*self.get_bb())
+        draw_rectangle(*self.get_bb())
         pass
 
     def get_bb(self):
@@ -978,24 +984,12 @@ class Boy:
                 self.degree = 0
                 self.state_machine.handle_event(('FALL_OUT', 0))
             else:
-                if self.land == 1:
+                if self.land == True:
                     self.degree = 0
                     self.state_machine.handle_event(('GOOD_FINISH', 0))
-                if self.land == 0:
+                if self.land == False:
                     if self.degree == 0:
                         self.state_machine.handle_event(('BAD_FINISH', 0))
                     else:
                         self.degree = 0
                         self.state_machine.handle_event(('FALL_OUT', 0))
-                
-
-    
-    def event_landing(self, event):
-        if event.type == SDL_KEYDOWN and event.key == SDLK_SPACE and self.ok == True:
-            if self.landing_collision == 1:
-                self.land = 1
-                pass
-            if self.landing_collision == 0:
-                self.land = 0
-                pass
-            self.ok = False
