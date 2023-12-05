@@ -42,7 +42,7 @@ class Back_ground:
         # self.image.draw(self.x + 1600, self.y, 1600, 600)
         self.font.draw(100, 550, f'speed = {play_mode.boy.speed:02d}', (255, 255, 255))
         self.font.draw(100, 500, f'score = {self.score:02d}', (255, 255, 255))
-        draw_rectangle(*self.get_bb())
+        # draw_rectangle(*self.get_bb())
         pass
 
     def get_bb(self):
@@ -215,7 +215,7 @@ class Goal:
 
     def draw(self):
         self.image.draw(self.sx, self.sy)
-        draw_rectangle(*self.get_bb())
+        # draw_rectangle(*self.get_bb())
         pass
 
     def get_bb(self):

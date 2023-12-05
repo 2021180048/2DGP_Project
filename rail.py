@@ -34,7 +34,7 @@ class Rail_0():
 
     def draw(self):
         self.image.draw(self.sx, self.sy)        
-        draw_rectangle(*self.get_bb())
+        # draw_rectangle(*self.get_bb())
         pass
 
     def get_bb(self):
@@ -73,7 +73,7 @@ class Stone_Rail_0():
 
     def draw(self):
         self.image.draw(self.sx, self.sy)        
-        draw_rectangle(*self.get_bb())
+        # draw_rectangle(*self.get_bb())
         pass
 
     def get_bb(self):
@@ -111,7 +111,7 @@ class Round_Rail_0():
 
     def draw(self):
         self.image.draw(self.sx, self.sy)        
-        draw_rectangle(*self.get_bb())
+        # draw_rectangle(*self.get_bb())
         pass
 
     def get_bb(self):

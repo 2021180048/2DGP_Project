@@ -4,7 +4,9 @@ main_file = 'main.py' # fill here
 # 데이타 파일들을 지정하세요.
 data_files = [
     # fill here
-    'back_ground.jpg', 'ENCR10B.TTF', 'rail.png', 'skater_sprite_sheet.png', 'Title_Screen.png'
+    'about.png', 'back_ground_new.png', 'city_0.png', 'city_1.png', 'city_2.png', 'ENCR10B.TTF', 'fall_out.wav', 'goal_reached.wav',
+    'goal.png', 'idle.wav', 'jump.wav', 'land.wav', 'moon.png', 'rail.png', 'result.png', 'round_rail.png', 'run.wav', 'skater_in_goal.png',
+    'skater_sprite_sheet.png', 'star.png', 'stone_rail.png', 'Title_Screen.png', 'walk.wav', 'white.png'
 ]
 
 # 데이타가 들어있는 폴더들을 지정하세요.
